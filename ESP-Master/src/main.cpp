@@ -12,8 +12,28 @@ SmartGridData smartGridData;
 StaticJsonDocument<256> doc;
 
 void onReceiveCallback(const uint8_t *mac, const uint8_t *incomingData, int len) {
-    handleReceivedSmartGridDataRaw(incomingData, len, doc);
+
+    switch (len) {
+        case sizeof(SmartGridData): {
+            // Wenn die Länge der empfangenen Daten der Größe von SmartGridData entspricht
+            Serial.println("Empfange SmartGridData...");
+            handleReceivedSmartGridDataRaw(incomingData, len, doc);
+            break;
+        }
+        case sizeof(JoinMessage): {
+
+            JoinMessage joinMsg;
+            memcpy(&joinMsg, incomingData, sizeof(JoinMessage));
+
+            handleJoinMessage(joinMsg);
+
+            printKnownPeers();
+            
+            break;
+        }
+    }
 }
+
 
 void setup() {
     Serial.begin(115200);

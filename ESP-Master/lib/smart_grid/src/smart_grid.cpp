@@ -6,6 +6,8 @@ static int peerCount = 0;
 
 
 
+//INIT
+
 // Funktion zum Ausgeben der MAC-Adresse
 void printMacAddress() {
     String mac = WiFi.macAddress();
@@ -24,7 +26,8 @@ void printMacAddress() {
 }
 
 // Funktion zum Initialisieren von ESP-NOW
-bool initEspNow(bool printMac = false) {
+bool initEspNow(bool printMac) {
+    esp_now_peer_info_t peerInfo;
 
     WiFi.mode(WIFI_STA);  // Setze WiFi in den Station-Modus 
 
@@ -38,17 +41,100 @@ bool initEspNow(bool printMac = false) {
         return false;
     }
 
+    memcpy(peerInfo.peer_addr, BROADCAST_MAC, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+
+    if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+        Serial.println("Failed to add peer");
+        return false;
+    }
+    for (size_t i = 0; i < 6; i++)
+    {
+        knownPeers[0][i] = BROADCAST_MAC[i];
+    }
+    peerCount = 1; // Setze die Anzahl der bekannten Peers auf 1 (Broadcast)
+
     Serial.println("ESP-NOW erfolgreich initialisiert.");
     return true;
 }
 
+
+
+// Join
+
+// Funktion zum Hinzufügen eines neuen Teilnehmers, wenn er noch nicht bekannt ist
+bool addPeerIfNew(const uint8_t* macAddress) {
+    for (int i = 0; i < peerCount; i++) {
+        if (memcmp(knownPeers[i], macAddress, 6) == 0) {
+            Serial.println("Peer bereits bekannt, überspringe Speicherung.");
+            return false; // Peer ist schon gespeichert
+        }
+    }
+
+    if (peerCount >= 20) {
+        Serial.println("Maximale Peer-Anzahl erreicht!");
+        return false;
+    }
+
+    memcpy(knownPeers[peerCount], macAddress, 6);
+    peerCount++;
+
+    esp_now_peer_info_t peerInfo{};
+    memcpy(peerInfo.peer_addr, macAddress, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+
+    if (!esp_now_is_peer_exist(macAddress)) {
+        esp_now_add_peer(&peerInfo);
+    }
+
+    Serial.print("Neuer Teilnehmer gespeichert: ");
+    for (int i = 0; i < 6; i++) {
+        Serial.printf("%02X", macAddress[i]);
+        if (i < 5) Serial.print(":");
+    }
+    Serial.println();
+
+    return true;
+}
+
+void handleJoinMessage(const JoinMessage& joinMsg) {
+    Serial.print("Join-Nachricht empfangen von: ");
+    for (int i = 0; i < 6; i++) {
+        Serial.printf("%02X", joinMsg.mac[i]);
+        if (i < 5) Serial.print(":");
+    }
+    Serial.println();
+
+    if (addPeerIfNew(joinMsg.mac)) {
+        Serial.printf("Modultyp: %d\n", joinMsg.module_type);
+        // Hier kannst du weitere Aktionen durchführen, z.B. das Modul initialisieren
+    } else {
+        Serial.println("Teilnehmer bereits bekannt.");
+    }
+}
+
+void printKnownPeers() {
+    Serial.println("Bekannte Peers:");
+    for (int i = 0; i < peerCount; i++) {
+        Serial.print("Peer ");
+        Serial.print(i + 1);
+        Serial.print(": ");
+        for (int j = 0; j < 6; j++) {
+            Serial.printf("%02X", knownPeers[i][j]);
+            if (j < 5) Serial.print(":");
+        }
+        Serial.println();
+    }
+}
+
+
+//MESSAGE
+
 // Funktion zum Konvertieren von JSON in SmartGridData
 bool jsonToSmartGrid(const JsonObject& json, SmartGridData* data) {
-    if (!json.containsKey("timestamp") ||
-        !json.containsKey("id") ||
-        !json.containsKey("module") ||
-        !json.containsKey("error"))
-        return false;
+
 
     data->timestamp = json["timestamp"].as<uint32_t>();
     data->id = json["id"].as<uint8_t>();
@@ -74,23 +160,29 @@ void smartGridToJson(const SmartGridData* data, JsonObject& json) {
 }
 
 
-// Funktion: JSON → Struct → Senden per ESP-NOW
-bool sendSmartGridJson(const JsonDocument& doc, const uint8_t* receiverAddress) {
-    SmartGridData data;
-    if (!jsonToSmartGrid(doc.as<JsonObject>(), &data)) {
-        Serial.println("Fehler beim Konvertieren der JSON-Nachricht");
-        return false;
-    }
 
-    esp_err_t result = esp_now_send(receiverAddress, (uint8_t*)&data, sizeof(SmartGridData));
-    if (result == ESP_OK) {
-        Serial.println("Nachricht erfolgreich gesendet");
-        return true;
-    } else {
-        Serial.printf("Fehler beim Senden: %d\n", result);
-        return false;
-    }
-}
+//ESP-NOW
+
+// Funktion: JSON → Struct → Senden per ESP-NOW
+// bool sendSmartGridJson(const JsonDocument& doc, const uint8_t* receiverAddress) {
+//     SmartGridData data;
+//     JsonObject obj = doc.as<JsonObject>();  // oder to<JsonObject>() bei leerem/neu erzeugtem doc
+
+//     if (!jsonToSmartGrid(obj, &data)) {
+//         Serial.println("Fehler beim Konvertieren der JSON-Nachricht");
+//         return false;
+//     }
+
+//     esp_err_t result = esp_now_send(receiverAddress, (uint8_t*)&data, sizeof(SmartGridData));
+//     if (result == ESP_OK) {
+//         Serial.println("Nachricht erfolgreich gesendet");
+//         return true;
+//     } else {
+//         Serial.printf("Fehler beim Senden: %d\n", result);
+//         return false;
+//     }
+// }
+
 
 // Funktion: Empfangene Rohdaten in JSON umwandeln und ausgeben
 void handleReceivedSmartGridDataRaw(const uint8_t* rawData, int len, JsonDocument& doc) {
@@ -137,39 +229,8 @@ bool sendEspNowBroadcast(const uint8_t* data, size_t len) {
     return sendEspNowMessage(BROADCAST_MAC, data, len);
 }
 
-bool addPeerIfNew(const uint8_t* macAddress) {
-    for (int i = 0; i < peerCount; i++) {
-        if (memcmp(knownPeers[i], macAddress, 6) == 0) {
-            return false; // Peer ist schon gespeichert
-        }
-    }
 
-    if (peerCount >= 20) {
-        Serial.println("Maximale Peer-Anzahl erreicht!");
-        return false;
-    }
 
-    memcpy(knownPeers[peerCount], macAddress, 6);
-    peerCount++;
-
-    esp_now_peer_info_t peerInfo{};
-    memcpy(peerInfo.peer_addr, macAddress, 6);
-    peerInfo.channel = 0;
-    peerInfo.encrypt = false;
-
-    if (!esp_now_is_peer_exist(macAddress)) {
-        esp_now_add_peer(&peerInfo);
-    }
-
-    Serial.print("Neuer Teilnehmer gespeichert: ");
-    for (int i = 0; i < 6; i++) {
-        Serial.printf("%02X", macAddress[i]);
-        if (i < 5) Serial.print(":");
-    }
-    Serial.println();
-
-    return true;
-}
 
 
 
