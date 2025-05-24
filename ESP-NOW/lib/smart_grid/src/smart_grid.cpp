@@ -1,8 +1,7 @@
 #include "smart_grid.h"
 
 static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-static uint8_t knownPeers[20][6]; // Max 20 Teilnehmer
-static int peerCount = 0;
+static ModuleRegistry moduleRegistry = { {}, 0 };
 
 
 
@@ -51,9 +50,9 @@ bool initEspNow(bool printMac) {
     }
     for (size_t i = 0; i < 6; i++)
     {
-        knownPeers[0][i] = BROADCAST_MAC[i];
+        moduleRegistry.modules[0].mac[i] = BROADCAST_MAC[i];
     }
-    peerCount = 1; // Setze die Anzahl der bekannten Peers auf 1 (Broadcast)
+    moduleRegistry.count = 1; // Setze die Anzahl der bekannten Peers auf 1 (Broadcast)
 
     Serial.println("ESP-NOW erfolgreich initialisiert.");
     return true;
@@ -77,23 +76,23 @@ void sendJoinMessage(uint8_t ModuleType) {
     }
 }
 
-
 // Funktion zum Hinzufügen eines neuen Teilnehmers, wenn er noch nicht bekannt ist
-bool addPeerIfNew(const uint8_t* macAddress) {
-    for (int i = 0; i < peerCount; i++) {
-        if (memcmp(knownPeers[i], macAddress, 6) == 0) {
+bool addPeerIfNew(const uint8_t* macAddress, ModuleType type = MODULE_SOLAR) {
+    for (int i = 0; i < moduleRegistry.count; i++) {
+        if (memcmp(moduleRegistry.modules[i].mac, macAddress, 6) == 0) {
             Serial.println("Peer bereits bekannt, überspringe Speicherung.");
             return false; // Peer ist schon gespeichert
         }
     }
 
-    if (peerCount >= 20) {
+    if (moduleRegistry.count >= MAX_MODULES) {
         Serial.println("Maximale Peer-Anzahl erreicht!");
         return false;
     }
 
-    memcpy(knownPeers[peerCount], macAddress, 6);
-    peerCount++;
+    memcpy(moduleRegistry.modules[moduleRegistry.count].mac, macAddress, 6);
+    moduleRegistry.modules[moduleRegistry.count].type = type;
+    moduleRegistry.count++;
 
     esp_now_peer_info_t peerInfo{};
     memcpy(peerInfo.peer_addr, macAddress, 6);
@@ -122,7 +121,7 @@ void handleJoinMessage(const JoinMessage& joinMsg) {
     }
     Serial.println();
 
-    if (addPeerIfNew(joinMsg.mac)) {
+    if (addPeerIfNew(joinMsg.mac, static_cast<ModuleType>(joinMsg.module_type))) {
         Serial.printf("Modultyp: %d\n", joinMsg.module_type);
         // Hier kannst du weitere Aktionen durchführen, z.B. das Modul initialisieren
     } else {
@@ -131,18 +130,40 @@ void handleJoinMessage(const JoinMessage& joinMsg) {
 }
 
 void printKnownPeers() {
-    Serial.println("Bekannte Peers:");
-    for (int i = 0; i < peerCount; i++) {
-        Serial.print("Peer ");
+    Serial.println("Bekannte Module:");
+    for (int i = 0; i < moduleRegistry.count; i++) {
+        Serial.print("Modul ");
         Serial.print(i + 1);
-        Serial.print(": ");
+        Serial.print(" (Typ ");
+        Serial.print(moduleRegistry.modules[i].type);
+        Serial.print("): ");
         for (int j = 0; j < 6; j++) {
-            Serial.printf("%02X", knownPeers[i][j]);
+            Serial.printf("%02X", moduleRegistry.modules[i].mac[j]);
             if (j < 5) Serial.print(":");
         }
         Serial.println();
     }
 }
+
+// Funktion zum Senden der ModuleRegistry an einen neuen Teilnehmer
+void sendMacListToNewPeer(const uint8_t* receiverMac) {
+    sendEspNowMessage(receiverMac, (uint8_t*)&moduleRegistry, sizeof(ModuleRegistry));
+}
+
+// Funktion zum Verarbeiten der empfangenen ModuleRegistry
+void waitForPeerList(const uint8_t* incomingData) {
+    const ModuleRegistry* receivedRegistry = (const ModuleRegistry*)incomingData;
+    Serial.println("Empfange ModuleRegistry von Peer:");
+
+    for (int i = 0; i < receivedRegistry->count && i < MAX_MODULES; ++i) {
+        addPeerIfNew(receivedRegistry->modules[i].mac, receivedRegistry->modules[i].type);
+    }
+
+    Serial.println("ModuleRegistry verarbeitet.");
+}
+
+
+
 
 
 //MESSAGE

@@ -6,6 +6,8 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
+const uint8_t MAX_MODULES = 20; // Maximale Anzahl an Modulen
+
 enum ModuleType : uint8_t {
     MODULE_SOLAR = 1,
     MODULE_WIND = 2,
@@ -19,6 +21,7 @@ enum ModuleType : uint8_t {
     MODULE_CAR = 10,
     MODULE_SUBSTATION = 11
 };
+
 
 typedef struct {
     uint8_t x;                  // 1 Byte
@@ -42,6 +45,16 @@ struct JoinMessage {
     uint8_t module_type; 
 };
 
+struct ModuleInfo {
+    uint8_t mac[6];
+    ModuleType type;
+};
+
+struct ModuleRegistry {
+    ModuleInfo modules[MAX_MODULES];
+    uint8_t count;
+};
+
 bool jsonToSmartGrid(const JsonObject& json, SmartGridData* data);
 void smartGridToJson(const SmartGridData* data, JsonObject& json);
 
@@ -51,7 +64,9 @@ void handleReceivedSmartGridDataRaw(const uint8_t* rawData, int len, JsonDocumen
 
 void printMacAddress();
 
-
+void sendMacListToNewPeer(const uint8_t* receiverMac);
+void waitForPeerList(const uint8_t* incomingData);
+void sendJoinMessage(uint8_t ModuleType);
 void handleJoinMessage(const JoinMessage& joinMsg);
 void printKnownPeers();
 bool initEspNow(bool printMac);
