@@ -4,7 +4,7 @@
 #include "smart_grid.h"
 
 
-static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+//static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 // Modulkonfiguration
 const ModuleType myModuleType = MODULE_WIND;  // Anpassen z. B. MODULE_WIND, MODULE_CAR etc.
 
@@ -58,6 +58,16 @@ void onReceiveCallback(const uint8_t *mac, const uint8_t *incomingData, int len)
             waitForPeerList(incomingData);
             recived_mac = true; // Setze Flag, dass eine MAC-Adresse empfangen wurde
             printKnownPeers(); // Zeige die bekannten Peers an
+            break;
+        }
+        case sizeof(ControlCommand): {
+            ControlCommand command;
+            memcpy(&command, incomingData, sizeof(ControlCommand));
+
+            Serial.print("Empfange ControlCommand test ");
+            handleControlCommand(command);
+            Serial.println("ControlCommand verarbeitet.");
+
             break;
         }
     }

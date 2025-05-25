@@ -4,7 +4,7 @@
 #include "smart_grid.h"
 
 
-static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+//static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 // Modulkonfiguration
 const ModuleType myModuleType = MODULE_WIND;  // Anpassen z. B. MODULE_WIND, MODULE_CAR etc.
 
