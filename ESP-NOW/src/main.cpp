@@ -56,8 +56,8 @@ void onReceiveCallback(const uint8_t *mac, const uint8_t *incomingData, int len)
             // Wenn die Länge der empfangenen Daten der Größe von MacListMessage entspricht
             Serial.println("Empfange MAC-Liste...");
             waitForPeerList(incomingData);
-            recived_mac = true; // Setze Flag, dass eine MAC-Adresse empfangen wurde
             printKnownPeers(); // Zeige die bekannten Peers an
+            recived_mac = true; // Setze Flag, dass eine MAC-Adresse empfangen wurde
             break;
         }
     }

@@ -1,5 +1,7 @@
 #include "registry.h"
 
+ModuleRegistry moduleRegistry = { {}, 0 };
+
 // Funktion zum Hinzufügen eines neuen Teilnehmers, wenn er noch nicht bekannt ist
 bool addPeerIfNew(const uint8_t* macAddress, ModuleType type = MODULE_SOLAR) {
     for (int i = 0; i < moduleRegistry.count; i++) {
@@ -48,6 +50,8 @@ void waitForPeerList(const uint8_t* incomingData) {
     Serial.println("Empfange ModuleRegistry von Peer:");
 
     for (int i = 0; i < receivedRegistry->count && i < MAX_MODULES; ++i) {
+        Serial.print("Modul1234   ");
+        Serial.println(receivedRegistry->modules[i].type);
         addPeerIfNew(receivedRegistry->modules[i].mac, receivedRegistry->modules[i].type);
     }
 

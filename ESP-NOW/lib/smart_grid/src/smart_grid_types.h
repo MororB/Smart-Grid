@@ -71,6 +71,7 @@ struct ModuleRegistry {
 
 
 static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-static ModuleRegistry moduleRegistry = { {}, 0 };
+//static ModuleRegistry moduleRegistry = { {}, 0 };
+extern ModuleRegistry moduleRegistry;
 
 #endif
