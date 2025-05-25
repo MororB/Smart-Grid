@@ -9,6 +9,6 @@
 
 void printMacAddress();
 void printKnownPeers();
-
+bool parseMac(const char* str, uint8_t* mac);
 
 #endif

@@ -8,6 +8,8 @@
 const uint8_t MAX_MODULES = 20; // Maximale Anzahl an Modulen
 
 enum ModuleType : uint8_t {
+    MODULE_MASTER = 0, // Master-Modul, z. B. der zentrale Controller
+    // Weitere Module, die im Smart Grid verwendet werden können
     MODULE_SOLAR = 1,
     MODULE_WIND = 2,
     MODULE_HYDRO = 3,
@@ -73,5 +75,6 @@ struct ModuleRegistry {
 static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 //static ModuleRegistry moduleRegistry = { {}, 0 };
 extern ModuleRegistry moduleRegistry;
+extern SmartGridData smartGridData;
 
 #endif

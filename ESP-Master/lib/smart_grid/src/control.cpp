@@ -1,18 +1,23 @@
 #include "control.h"
 
 
-void handleControlCommand(ControlCommand command){
+void handleControlCommand(const uint8_t* macAddress, ControlCommand command){
     Serial.print("ControlCommand empfangen");
 
     switch (command.type) {
         case SET_MODE:
             Serial.printf("SET_MODE empfangen, Modus: %d\n", command.mode);
-            // Hier Logik für SET_MODE implementieren
+            
             break;
-        case REQUEST_STATUS:
+        case REQUEST_STATUS: {
             Serial.println("REQUEST_STATUS empfangen");
-            // Hier Logik für REQUEST_STATUS implementieren
+
+            StaticJsonDocument<256> doc_int;
+            smartGridToJson(&smartGridData, doc_int);
+            sendSmartGridJson(doc_int, macAddress);
             break;
+        }
+
         case SET_STATUS:
             Serial.println("SET_STATUS empfangen");
             // Hier Logik für SET_STATUS implementieren
@@ -22,7 +27,6 @@ void handleControlCommand(ControlCommand command){
             break;
     }
 }
-
 
 
 

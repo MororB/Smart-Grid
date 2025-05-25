@@ -6,14 +6,14 @@
 
 //static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 // Modulkonfiguration
-const ModuleType myModuleType = MODULE_WIND;  // Anpassen z. B. MODULE_WIND, MODULE_CAR etc.
+const ModuleType myModuleType = MODULE_MASTER;  // Anpassen z. B. MODULE_WIND, MODULE_CAR etc.
 
 
 // Daten-Structs
-SmartGridData smartGridData;
+//SmartGridData smartGridData;
 JoinMessage joinMessage;
 StaticJsonDocument<256> doc;
-
+uint8_t own_mac[6];
 bool recived_mac = false; // Flag, ob eine MAC-Adresse empfangen wurde
 uint8_t modulnumber = 0; // Zähler für die Anzahl der empfangenen Module
 
@@ -60,16 +60,6 @@ void onReceiveCallback(const uint8_t *mac, const uint8_t *incomingData, int len)
             printKnownPeers(); // Zeige die bekannten Peers an
             break;
         }
-        case sizeof(ControlCommand): {
-            ControlCommand command;
-            memcpy(&command, incomingData, sizeof(ControlCommand));
-
-            Serial.print("Empfange ControlCommand test ");
-            handleControlCommand(command);
-            Serial.println("ControlCommand verarbeitet.");
-
-            break;
-        }
     }
 }
 
@@ -96,24 +86,58 @@ void setup() {
         delay(10);
     }
 
+    esp_wifi_get_mac(WIFI_IF_STA, own_mac);  // Hole die MAC-Adresse des Geräts
     
     
 }
 
 void loop() {
-    unsigned long now = millis();
-    if (now - lastSendTime > sendInterval) {
-        doc["timestamp"] = now;
-        doc["id"] = 1;  // Beispiel-ID, anpassen je nach Bedarf
-        doc["module"] = myModuleType;  // Aktueller Modultyp
-        doc["current_consumption"] = 0.0f;  // Beispielwert, anpassen je nach Bedarf
-        doc["current_generation"] = 5.0f;  // Beispielwert, anpassen je nach Bedarf
-        doc["current_storage"] = 10.0f;  // Beispielwert, anpassen je nach Bedarf
-        doc["coordinates"]["x"] = 0;  // Beispielkoordinate, anpassen je nach Bedarf
-        doc["coordinates"]["y"] = 0;  // Beispielkoordinate, anpassen je nach Bedarf
-        doc["error"] = 0;  // Beispielwert, anpassen je nach Bedarf
-        lastSendTime = now;
-        //sendSmartGridJson(doc, BROADCAST_MAC);
-        //Serial.println("SmartGrid-Daten gesendet");
+    if (Serial.available()) {
+        String input = Serial.readStringUntil('\n');
+        input.trim();
+
+        if (input.startsWith("SET_MODE")) {
+            // Beispiel: SET_MODE AA:BB:CC:DD:EE:FF 1
+            ControlCommand cmd;
+            sscanf(input.c_str(), "SET_MODE %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %hhu",
+                &cmd.targetMac[0], &cmd.targetMac[1], &cmd.targetMac[2],
+                &cmd.targetMac[3], &cmd.targetMac[4], &cmd.targetMac[5],
+                &cmd.mode);
+
+            cmd.type = SET_MODE;
+            sendControlCommand(cmd.targetMac,cmd);
+        }
+
+        else if (input.startsWith("REQUEST_STATUS")) {
+            // Beispiel: REQUEST_STATUS AA:BB:CC:DD:EE:FF
+            ControlCommand cmd;
+            sscanf(input.c_str(), "REQUEST_STATUS %hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+                &cmd.targetMac[0], &cmd.targetMac[1], &cmd.targetMac[2],
+                &cmd.targetMac[3], &cmd.targetMac[4], &cmd.targetMac[5]);
+
+            cmd.type = REQUEST_STATUS;
+            //memcpy(cmd.targetMac, own_mac, 6);
+            sendControlCommand(cmd.targetMac,cmd);
+        }
+
+        else if (input.startsWith("SET_STATUS")) {
+            // Erweiterbar: Manuell z. B. aus JSON parsen (später)
+            // z. B.: SET_STATUS AA:BB:... 100 50 20
+
+            // Dummy-Implementierung für Beispiel
+            ControlCommand cmd;
+            sscanf(input.c_str(), "SET_STATUS %hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+                &cmd.targetMac[0], &cmd.targetMac[1], &cmd.targetMac[2],
+                &cmd.targetMac[3], &cmd.targetMac[4], &cmd.targetMac[5]);
+
+            cmd.type = SET_STATUS;
+            //cmd.statusOverride = {/* z. B. Dummy-Daten */};
+            sendControlCommand(cmd.targetMac,cmd);
+        }
+
+        else {
+            Serial.println("Unbekannter Befehl.");
+        }
     }
+    delay(100); // Kurze Pause
 }

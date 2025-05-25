@@ -18,9 +18,17 @@ bool recived_mac = false; // Flag, ob eine MAC-Adresse empfangen wurde
 uint8_t modulnumber = 0; // Zähler für die Anzahl der empfangenen Module
 
 unsigned long lastSendTime = 0;
-const unsigned long sendInterval = 2000;  // Alle 2 Sekunden
+const unsigned long sendInterval = 5000;  // Alle 2 Sekunden
 
 void onReceiveCallback(const uint8_t *mac, const uint8_t *incomingData, int len) {
+
+    Serial.print("Empfange Daten von MAC: ");
+    for (int i = 0; i < 6; i++) {
+        Serial.printf("%02X", mac[i]);
+        if (i < 5) Serial.print(":");
+    }
+
+
 
     switch (len) {
         case sizeof(SmartGridData): {
@@ -58,6 +66,17 @@ void onReceiveCallback(const uint8_t *mac, const uint8_t *incomingData, int len)
             waitForPeerList(incomingData);
             printKnownPeers(); // Zeige die bekannten Peers an
             recived_mac = true; // Setze Flag, dass eine MAC-Adresse empfangen wurde
+            break;
+        }
+        
+        case sizeof(ControlCommand): {
+            ControlCommand command;
+            memcpy(&command, incomingData, sizeof(ControlCommand));
+
+            Serial.print("Empfange ControlCommand test ");
+            handleControlCommand(mac,command);
+            Serial.println("ControlCommand verarbeitet.");
+
             break;
         }
     }
@@ -99,10 +118,11 @@ void loop() {
         doc["current_consumption"] = 0.0f;  // Beispielwert, anpassen je nach Bedarf
         doc["current_generation"] = 5.0f;  // Beispielwert, anpassen je nach Bedarf
         doc["current_storage"] = 10.0f;  // Beispielwert, anpassen je nach Bedarf
-        doc["coordinates"]["x"] = 0;  // Beispielkoordinate, anpassen je nach Bedarf
-        doc["coordinates"]["y"] = 0;  // Beispielkoordinate, anpassen je nach Bedarf
+        doc["coordinates"]["x"] = 1;  // Beispielkoordinate, anpassen je nach Bedarf
+        doc["coordinates"]["y"] = 5;  // Beispielkoordinate, anpassen je nach Bedarf
         doc["error"] = 0;  // Beispielwert, anpassen je nach Bedarf
         lastSendTime = now;
+        jsonToSmartGrid(doc, &smartGridData);  // Konvertiere JSON zu SmartGridData
         //sendSmartGridJson(doc, BROADCAST_MAC);
         //Serial.println("SmartGrid-Daten gesendet");
     }

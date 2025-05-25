@@ -36,7 +36,7 @@ bool initEspNow(bool printMac) {
 
 void sendJoinMessage(uint8_t ModuleType) {
     JoinMessage joinMessage;
-    memcpy(joinMessage.mac, WiFi.macAddress().c_str(), 6);  // Nur symbolisch, besser: WiFi.macAddress() manuell in Bytes aufteilen
+    esp_wifi_get_mac(WIFI_IF_STA, joinMessage.mac);  // Hole die MAC-Adresse des Geräts
     joinMessage.is_joining = true;
     joinMessage.module_type = ModuleType;
 
@@ -97,3 +97,16 @@ bool sendEspNowBroadcast(const uint8_t* data, size_t len) {
     return sendEspNowMessage(BROADCAST_MAC, data, len);
 }
 
+void sendControlCommand(const ControlCommand& command) {
+    Serial.println("Sende ControlCommand...");
+    Serial.printf("Ziel MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+        command.targetMac[0], command.targetMac[1], command.targetMac[2],
+        command.targetMac[3], command.targetMac[4], command.targetMac[5]);
+    esp_err_t result = esp_now_send(command.targetMac, (uint8_t*)&command, sizeof(ControlCommand));
+    
+    if (result == ESP_OK) {
+        Serial.println("ControlCommand gesendet.");
+    } else {
+        Serial.printf("Senden fehlgeschlagen: %d\n", result);
+    }
+}

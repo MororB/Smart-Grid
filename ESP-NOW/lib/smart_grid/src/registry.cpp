@@ -31,7 +31,7 @@ bool addPeerIfNew(const uint8_t* macAddress, ModuleType type = MODULE_SOLAR) {
 
     Serial.print("Neuer Teilnehmer gespeichert: ");
     for (int i = 0; i < 6; i++) {
-        Serial.printf("%02X", macAddress[i]);
+        Serial.printf("%hhx", macAddress[i]);
         if (i < 5) Serial.print(":");
     }
     Serial.println();
