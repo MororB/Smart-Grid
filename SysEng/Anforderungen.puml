@@ -1,0 +1,41 @@
+@startuml Anforderungen
+
+skinparam classIconSize 0
+
+  
+  ' Haupt-Anforderung
+  rectangle "Anforderungen an das System" <<requirement>>
+
+  ' Einzelne Teil-Anforderungen
+  rectangle "Modularität" <<requirement>> {
+  }
+
+  rectangle "Kompaktheit" <<requirement>> {
+  }
+
+  rectangle "Robuste Bauweise" <<requirement>> {
+  }
+
+  rectangle "Elektromagnetische Verträglichkeit" <<requirement>> {
+  }
+
+  rectangle "Austauschbare Energieversorgung" <<requirement>> 
+
+  rectangle "Energieeffizienz" <<requirement>> 
+  
+
+  rectangle "Benutzerfreundlichkeit" <<requirement>> 
+
+  rectangle "Kostenoptimierung & Erweiterbarkeit" <<requirement>> 
+
+' Verfeinerungs-Beziehungen von der Haupt- zur Teil-Anforderung
+"Anforderungen an das System" -- "Modularität"
+"Anforderungen an das System" -- "Kompaktheit"
+"Anforderungen an das System" -- "Robuste Bauweise"
+"Anforderungen an das System" -- "Elektromagnetische Verträglichkeit"
+"Anforderungen an das System" -- "Austauschbare Energieversorgung"
+"Anforderungen an das System" -- "Energieeffizienz"
+"Anforderungen an das System" -- "Benutzerfreundlichkeit"
+"Anforderungen an das System" -- "Kostenoptimierung & Erweiterbarkeit"
+
+@enduml
