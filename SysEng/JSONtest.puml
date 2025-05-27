@@ -1,0 +1,77 @@
+@startjson
+{
+  "company": {
+    "name": "Acme Corporation",
+    "founded": 1998,
+    "departments": [
+      {
+        "id": 1,
+        "name": "Engineering",
+        "managerId": 101,
+        "employees": [101, 102, 103]
+      },
+      {
+        "id": 2,
+        "name": "Marketing",
+        "managerId": 201,
+        "employees": [201, 202]
+      }
+    ],
+    "employees": [
+      {
+        "id": 101,
+        "firstName": "Alice",
+        "lastName": "Smith",
+        "role": "CTO",
+        "reportsTo": null
+      },
+      {
+        "id": 102,
+        "firstName": "Bob",
+        "lastName": "Johnson",
+        "role": "Senior Developer",
+        "reportsTo": 101
+      },
+      {
+        "id": 103,
+        "firstName": "Carol",
+        "lastName": "Taylor",
+        "role": "QA Engineer",
+        "reportsTo": 101
+      },
+      {
+        "id": 201,
+        "firstName": "David",
+        "lastName": "Brown",
+        "role": "CMO",
+        "reportsTo": null
+      },
+      {
+        "id": 202,
+        "firstName": "Eve",
+        "lastName": "Davis",
+        "role": "Content Specialist",
+        "reportsTo": 201
+      }
+    ],
+    "offices": [
+      {
+        "location": "Berlin",
+        "address": {
+          "street": "Unter den Linden 1",
+          "zip": "10117",
+          "country": "Germany"
+        }
+      },
+      {
+        "location": "Paris",
+        "address": {
+          "street": "Champs-Élysées 50",
+          "zip": "75008",
+          "country": "France"
+        }
+      }
+    ]
+  }
+}
+@endjson

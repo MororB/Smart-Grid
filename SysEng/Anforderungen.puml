@@ -1,8 +1,7 @@
 @startuml Anforderungen
 
-skinparam classIconSize 0
 
-  
+
   ' Haupt-Anforderung
   rectangle "Anforderungen an das System" <<requirement>>
 
