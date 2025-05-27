@@ -7,11 +7,7 @@ skinparam classIconSize 0
   rectangle "Anforderungen an das System" <<requirement>>
 
   ' Einzelne Teil-Anforderungen
-  rectangle "Modularität" <<requirement>> {
-  }
 
-  rectangle "Kompaktheit" <<requirement>> {
-  }
 
   rectangle "Robuste Bauweise" <<requirement>> {
   }
@@ -23,18 +19,27 @@ skinparam classIconSize 0
 
   rectangle "Energieeffizienz" <<requirement>> 
   
+  rectangle "Modularität" <<requirement>> {
+  }
+  rectangle "Praktikabilität" <<requirement>> {
+  }
+
+  rectangle "Kompaktheit" <<requirement>> {
+  }
 
   rectangle "Benutzerfreundlichkeit" <<requirement>> 
 
   rectangle "Kostenoptimierung & Erweiterbarkeit" <<requirement>> 
 
 ' Verfeinerungs-Beziehungen von der Haupt- zur Teil-Anforderung
-"Anforderungen an das System" -- "Modularität"
-"Anforderungen an das System" -- "Kompaktheit"
+
 "Anforderungen an das System" -- "Robuste Bauweise"
 "Anforderungen an das System" -- "Elektromagnetische Verträglichkeit"
-"Anforderungen an das System" -- "Austauschbare Energieversorgung"
 "Anforderungen an das System" -- "Energieeffizienz"
+"Anforderungen an das System" -- "Praktikabilität"
+"Praktikabilität" -- "Modularität"
+"Praktikabilität" -- "Kompaktheit"
+"Praktikabilität" -- "Austauschbare Energieversorgung"
 "Anforderungen an das System" -- "Benutzerfreundlichkeit"
 "Anforderungen an das System" -- "Kostenoptimierung & Erweiterbarkeit"
 
