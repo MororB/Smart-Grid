@@ -1,0 +1,36 @@
+@startuml Systemumfeld UML-Diagramm
+
+' Paket oder Rahmen für das Systemumfeld
+rectangle "Systemumfeld" as SYS 
+    rectangle "Messebesucher oder Zuschauer" as MZ
+    rectangle "Anwender"                         as Anw
+    rectangle "Kommunikation"                    as Kom
+    rectangle "Technische Umgebung"              as Tech
+
+    rectangle "Kinder und Erwachsene"      as K
+
+    rectangle "Studenten und Dozenten"   as S
+
+    rectangle "Stromversorgung"    as SV
+    rectangle "Lichtverhältnisse"  as L
+    rectangle "Freiraum"            as FR
+    rectangle "Netwerkverbindung" as NV
+
+
+' Assoziationen (Verbindungen)
+SYS  -- MZ
+SYS  -- Anw
+SYS  -- Kom
+SYS  -- Tech
+
+MZ   -- K
+
+Anw  -- S
+Kom -- NV
+
+
+Tech -- SV
+Tech -- L
+Tech -- FR
+Tech -- NV
+@enduml
