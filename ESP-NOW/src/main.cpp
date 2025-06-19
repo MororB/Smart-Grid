@@ -24,6 +24,7 @@ void setup() {
 }
 
 void loop() {
-    SmartGridData data = smartGrid.getSmartGridData();
-    // ... Daten verarbeiten oder setzen ...
+    //SmartGridData data = smartGrid.getSmartGridData();
+    smartGrid.update();
+    
 }

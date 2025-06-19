@@ -52,11 +52,20 @@ enum ControlCommandType {
     SET_STATUS
 };
 
+enum ModuleMode : uint8_t {
+    MODE_AUTOMATIK = 0,
+    MODE_TAGESZYKLUS = 1,
+    MODE_NACHTZYKLUS = 2,
+    MODE_TAGNACHTZYKLUS = 3,
+    MODE_INTERAKTIV = 4,
+    MODE_PAUSE = 5
+};
+
 struct ControlCommand {
     uint8_t targetMac[6];
     ControlCommandType type;
-    uint8_t mode; // z. B. bei SET_MODE
-    SmartGridData statusOverride; // bei SET_STATUS
+    ModuleMode mode; // statt uint8_t mode
+    SmartGridData statusOverride;
 };
 
 struct ModuleInfo {
@@ -71,10 +80,41 @@ struct ModuleRegistry {
 
 
 
+enum MessageType : uint8_t {
+    MSG_SMARTGRID_DATA = 1,
+    MSG_JOIN = 2,
+    MSG_MODULE_REGISTRY = 3,
+    MSG_CONTROL_COMMAND = 4
+};
+
+struct MessageHeader {
+    MessageType type;
+};
 
 static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 //static ModuleRegistry moduleRegistry = { {}, 0 };
 extern ModuleRegistry moduleRegistry;
 extern SmartGridData smartGridData;
+
+struct SmartGridDataMessage {
+    MessageType type;
+    SmartGridData data;
+};
+
+struct JoinMessageWithType {
+    MessageType type;
+    JoinMessage join;
+};
+
+struct ModuleRegistryMessage {
+    MessageType type;
+    ModuleRegistry registry;
+};
+
+struct ControlCommandMessage {
+    MessageType type;
+    ControlCommand command;
+};
+
 
 #endif

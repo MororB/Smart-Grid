@@ -22,6 +22,13 @@ public:
     void handleReceivedModuleRegistry(const uint8_t* incomingData);
     void handleJoinMessage(const JoinMessage& joinMsg);
     void handleControlCommand(const uint8_t* macAddress, ControlCommand command);
+    void handleReceivedSmartGridDataRaw(const uint8_t* rawData, int len, JsonDocument& doc);
+    bool jsonToSmartGrid(const JsonDocument& json, SmartGridData* data);
+    void smartGridToJson(const SmartGridData* data, JsonDocument& json);
+    void sendControlCommand(const uint8_t* receiverMac, const ControlCommand& command);
+    void sendSmartGridData(const uint8_t* receiverMac);
+
+    void update();
 
     // Getter/Setter für SmartGridData
     SmartGridData getSmartGridData() const;
@@ -29,12 +36,22 @@ public:
 
     // Zugriff auf ModuleRegistry
     const ModuleRegistry& getModuleRegistry() const;
+    ModuleMode getCurrentMode() const;
+    void setCurrentMode(ModuleMode mode);
 
 private:
     ModuleType myModuleType;
     SmartGridData smartGridData;
     ModuleRegistry moduleRegistry;
     StaticJsonDocument<256> doc;
+    ModuleMode currentMode = MODE_AUTOMATIK; // Standardmodus
+
+    void runAutomatik();
+    void runTageszyklus();
+    void runNachtzyklus();
+    void runTagNachtzyklus();
+    void runInteraktiv();
+    void runPause();
 };
 
 #endif
