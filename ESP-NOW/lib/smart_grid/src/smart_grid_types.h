@@ -84,7 +84,8 @@ enum MessageType : uint8_t {
     MSG_SMARTGRID_DATA = 1,
     MSG_JOIN = 2,
     MSG_MODULE_REGISTRY = 3,
-    MSG_CONTROL_COMMAND = 4
+    MSG_CONTROL_COMMAND = 4,
+    MSG_REGISTRY_REQUEST = 5
 };
 
 struct MessageHeader {
@@ -114,6 +115,11 @@ struct ModuleRegistryMessage {
 struct ControlCommandMessage {
     MessageType type;
     ControlCommand command;
+};
+
+struct RegistryRequestMessage {
+    MessageType type;
+    uint8_t requesterMac[6];
 };
 
 

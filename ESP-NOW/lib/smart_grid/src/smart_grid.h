@@ -27,6 +27,9 @@ public:
     void smartGridToJson(const SmartGridData* data, JsonDocument& json);
     void sendControlCommand(const uint8_t* receiverMac, const ControlCommand& command);
     void sendSmartGridData(const uint8_t* receiverMac);
+    void sendRegistryRequest();
+    void tryRequestRegistry();
+    void begin();
 
     void update();
 
@@ -45,6 +48,11 @@ private:
     ModuleRegistry moduleRegistry;
     StaticJsonDocument<256> doc;
     ModuleMode currentMode = MODE_AUTOMATIK; // Standardmodus
+    uint8_t newPeerCount = 0;                // Wie bisher: zählt neue Peers
+    uint8_t receivedRegistryRequests = 0;     // Zählt empfangene RegistryRequests
+    unsigned long lastRegistryRequestTime = 0; // Für Timing
+    uint8_t registryRequestAttempts = 0;      // Wie oft schon versucht
+    bool registryReceived = false;            // Wurde eine Registry empfangen?
 
     void runAutomatik();
     void runTageszyklus();

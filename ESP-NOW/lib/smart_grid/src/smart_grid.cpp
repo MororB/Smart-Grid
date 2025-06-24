@@ -55,6 +55,7 @@ void SmartGrid::sendControlCommand(const uint8_t* receiverMac, const ControlComm
 }
 
 void SmartGrid::handleReceivedModuleRegistry(const uint8_t* incomingData) {
+    registryReceived = true;
     const ModuleRegistry* receivedRegistry = (const ModuleRegistry*)incomingData;
     for (int i = 0; i < receivedRegistry->count && i < MAX_MODULES; ++i) {
         addPeerIfNew(receivedRegistry->modules[i].mac, receivedRegistry->modules[i].type);
@@ -107,6 +108,26 @@ void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingDat
             }
             break;
         }
+        case MSG_REGISTRY_REQUEST: {
+            RegistryRequestMessage req;
+            memcpy(&req, incomingData, sizeof(req));
+            receivedRegistryRequests++; // Zähle mit
+
+            uint8_t myMac[6];
+            WiFi.macAddress(myMac);
+
+            // Berechne das Index des Moduls, das antworten soll:
+            // Das letzte Modul: count-1, vorletzte: count-2, vorvorletzte: count-3, usw.
+            int responderIndex = moduleRegistry.count - receivedRegistryRequests;
+            if (responderIndex >= 0 && responderIndex < moduleRegistry.count) {
+                if (memcmp(moduleRegistry.modules[responderIndex].mac, myMac, 6) == 0 &&
+                    memcmp(req.requesterMac, myMac, 6) != 0) {
+                    Serial.printf("Modul %d antwortet auf RegistryRequest (Request #%d)\n", responderIndex + 1, receivedRegistryRequests);
+                    sendModuleRegistryToPeer(req.requesterMac);
+                }
+            }
+            break;
+        }
         default:
             Serial.println("Unbekannter Nachrichtentyp!");
             break;
@@ -141,6 +162,8 @@ bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, ModuleType type) {
     moduleRegistry.modules[moduleRegistry.count].type = type;
     moduleRegistry.count++;
 
+    newPeerCount++; // Zähler erhöhen
+
     esp_now_peer_info_t peerInfo{};
     memcpy(peerInfo.peer_addr, macAddress, 6);
     peerInfo.channel = 0;
@@ -148,6 +171,12 @@ bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, ModuleType type) {
     if (!esp_now_is_peer_exist(macAddress)) {
         esp_now_add_peer(&peerInfo);
     }
+
+    // Wenn dies der erste neue Peer ist, Registry senden
+    if (newPeerCount == 1) {
+        sendModuleRegistryToPeer(macAddress);
+    }
+
     return true;
 }
 
@@ -271,6 +300,60 @@ void SmartGrid::runTagNachtzyklus() {
 
 void SmartGrid::runPause() {
     // TODO: Pause-Modus-Logik hier implementieren
+}
+
+void SmartGrid::sendRegistryRequest() {
+    RegistryRequestMessage msg;
+    msg.type = MSG_REGISTRY_REQUEST;
+    WiFi.macAddress(msg.requesterMac);
+    esp_now_send(BROADCAST_MAC, (uint8_t*)&msg, sizeof(msg));
+}
+
+void SmartGrid::tryRequestRegistry() {
+    if (registryReceived) return; // Schon erhalten, nichts tun
+
+    unsigned long now = millis();
+    const uint8_t MAX_ATTEMPTS = 3;
+    const unsigned long INTERVAL = 2000; // alle 2 Sekunden
+
+    if (registryRequestAttempts < MAX_ATTEMPTS && now - lastRegistryRequestTime > INTERVAL) {
+        sendRegistryRequest();
+        registryRequestAttempts++;
+        lastRegistryRequestTime = now;
+        Serial.println("RegistryRequest gesendet.");
+    }
+
+    if (!registryReceived && registryRequestAttempts >= MAX_ATTEMPTS) {
+        Serial.println("Ich bin das erste Modul im Netzwerk.");
+        // Hier ggf. spezielle Initialisierung
+    }
+}
+
+void SmartGrid::begin() {
+    // Reset relevanter Variablen
+    registryReceived = false;
+    registryRequestAttempts = 0;
+    receivedRegistryRequests = 0;
+    newPeerCount = 0;
+    lastRegistryRequestTime = millis();
+
+    // Sende Join-Message
+    sendJoinMessage();
+
+    Serial.println("SmartGrid Initialisierung gestartet. Warte auf Registry...");
+
+    // Warte, bis Registry empfangen wurde oder Modul als erstes erkannt wird
+    while (!registryReceived && registryRequestAttempts < 3) {
+        tryRequestRegistry();
+        delay(100); // Kurze Pause, damit die Schleife nicht zu schnell läuft
+    }
+
+    if (registryReceived) {
+        Serial.println("Registry erfolgreich empfangen!");
+    } else {
+        Serial.println("Keine Registry erhalten. Ich bin das erste Modul im Netzwerk.");
+        // Hier ggf. spezielle Initialisierung
+    }
 }
 
 

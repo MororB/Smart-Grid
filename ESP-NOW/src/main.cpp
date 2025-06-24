@@ -18,13 +18,13 @@ void setup() {
 
     esp_now_register_recv_cb(onReceiveCallback);
 
-    Serial.println("Client bereit");
-
-    smartGrid.sendJoinMessage();
+    smartGrid.begin();
+    Serial.println("SmartGrid initialisiert und bereit.");
 }
 
 void loop() {
     //SmartGridData data = smartGrid.getSmartGridData();
     smartGrid.update();
+    delay(1000); // Update alle 1 Sekunde
     
 }
