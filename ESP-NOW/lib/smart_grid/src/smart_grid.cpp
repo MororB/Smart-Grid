@@ -12,6 +12,14 @@ bool SmartGrid::initEspNow(bool printMac) {
         Serial.println("ESP-NOW Init fehlgeschlagen!");
         return false;
     }
+    // Peer für Broadcast hinzufügen (Workaround für manche ESP32-Versionen)
+    esp_now_peer_info_t peerInfo = {};
+    memset(&peerInfo, 0, sizeof(peerInfo));
+    for (int i = 0; i < 6; ++i) peerInfo.peer_addr[i] = 0xFF;
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+    esp_now_add_peer(&peerInfo);
+    Serial.println("ESP-NOW Init erfolgreich!");
     if (printMac) printMacAddress();
     return true;
 }
@@ -32,6 +40,7 @@ void SmartGrid::printMacAddress() const {
 }
 
 void SmartGrid::sendJoinMessage() {
+    Serial.println("Sende Join-Message...");
     JoinMessageWithType msg;
     msg.type = MSG_JOIN;
     msg.join.is_joining = true;
@@ -109,22 +118,54 @@ void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingDat
             break;
         }
         case MSG_REGISTRY_REQUEST: {
+            Serial.println("Empfange RegistryRequest...");
             RegistryRequestMessage req;
             memcpy(&req, incomingData, sizeof(req));
             receivedRegistryRequests++; // Zähle mit
 
+            Serial.print("Anzahl empfangener RegistryRequests: ");
+            Serial.println(receivedRegistryRequests);
+
             uint8_t myMac[6];
             WiFi.macAddress(myMac);
 
-            // Berechne das Index des Moduls, das antworten soll:
-            // Das letzte Modul: count-1, vorletzte: count-2, vorvorletzte: count-3, usw.
+            Serial.print("Meine MAC: ");
+            for (int i = 0; i < 6; ++i) {
+                Serial.printf("%02X", myMac[i]);
+                if (i < 5) Serial.print(":");
+            }
+            Serial.println();
+
+            Serial.print("Requester MAC: ");
+            for (int i = 0; i < 6; ++i) {
+                Serial.printf("%02X", req.requesterMac[i]);
+                if (i < 5) Serial.print(":");
+            }
+            Serial.println();
+
             int responderIndex = moduleRegistry.count - receivedRegistryRequests;
+            Serial.print("Berechneter responderIndex: ");
+            Serial.println(responderIndex);
+
             if (responderIndex >= 0 && responderIndex < moduleRegistry.count) {
+                Serial.print("Vergleiche MAC von Modul ");
+                Serial.print(responderIndex + 1);
+                Serial.print(": ");
+                for (int i = 0; i < 6; ++i) {
+                    Serial.printf("%02X", moduleRegistry.modules[responderIndex].mac[i]);
+                    if (i < 5) Serial.print(":");
+                }
+                Serial.println();
+
                 if (memcmp(moduleRegistry.modules[responderIndex].mac, myMac, 6) == 0 &&
                     memcmp(req.requesterMac, myMac, 6) != 0) {
                     Serial.printf("Modul %d antwortet auf RegistryRequest (Request #%d)\n", responderIndex + 1, receivedRegistryRequests);
                     sendModuleRegistryToPeer(req.requesterMac);
+                } else {
+                    Serial.println("Dieses Modul ist nicht an der Reihe zu antworten oder Anfrage kommt von mir selbst.");
                 }
+            } else {
+                Serial.println("responderIndex außerhalb des gültigen Bereichs!");
             }
             break;
         }
@@ -280,26 +321,32 @@ void SmartGrid::runInteraktiv() {
     //int analogValue = analogRead(A0); // Beispiel: Wert einlesen
     //smartGridData.current_consumption = analogValue * 0.01f; // Beispiel: Wert umrechnen
     // ...weitere Logik...
+    Serial.println("Interaktiver Modus läuft...");
 }
 
 void SmartGrid::runAutomatik() {
     // TODO: Automatik-Modus-Logik hier implementieren
+    Serial.println("Automatik-Modus läuft...");
 }
 
 void SmartGrid::runTageszyklus() {
     // TODO: Tageszyklus-Modus-Logik hier implementieren
+    Serial.println("Tageszyklus-Modus läuft...");
 }
 
 void SmartGrid::runNachtzyklus() {
     // TODO: Nachtzyklus-Modus-Logik hier implementieren
+    Serial.println("Nachtzyklus-Modus läuft...");
 }
 
 void SmartGrid::runTagNachtzyklus() {
     // TODO: TagNachtZyklus-Modus-Logik hier implementieren
+    Serial.println("TagNachtZyklus-Modus läuft...");
 }
 
 void SmartGrid::runPause() {
     // TODO: Pause-Modus-Logik hier implementieren
+    Serial.println("Pause-Modus läuft...");
 }
 
 void SmartGrid::sendRegistryRequest() {
