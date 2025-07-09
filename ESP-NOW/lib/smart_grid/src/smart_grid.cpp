@@ -2,6 +2,7 @@
 
 SmartGrid::SmartGrid(ModuleType myType)
     : myModuleType(myType)
+    ,display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1) // -1 für Reset-Pin, da nicht verwendet
 {
     moduleRegistry.count = 0;
 }
@@ -315,11 +316,21 @@ void SmartGrid::setCurrentMode(ModuleMode mode) {
 
 void SmartGrid::updateDisplay() {
     Serial.println("Aktualisiere Display...");
+
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    // Display static text
+    display.println("Hello world!");
+    display.display(); 
+
     
 }
 
 void SmartGrid::updateLED() {
     Serial.println("Aktualisiere LED...");
+
+
     
 }
 
@@ -457,6 +468,8 @@ void SmartGrid::runAutomatik() {
     default:
         break;
     }
+    updateDisplay();
+    updateLED();
 }
 
 void SmartGrid::runTageszyklus() {
@@ -669,6 +682,12 @@ void SmartGrid::begin() {
     receivedRegistryRequests = 0;
     newPeerCount = 0;
     lastRegistryRequestTime = millis();
+
+    if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
+    Serial.println(F("SSD1306 allocation failed"));
+    }
+    
+    display.clearDisplay();
 
     // Sende Join-Message
     sendJoinMessage();

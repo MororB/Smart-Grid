@@ -5,9 +5,21 @@
 #include <esp_now.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include "smart_grid_types.h"
 
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+
+
+
 class SmartGrid {
+
 public:
     SmartGrid(ModuleType myType);
 
@@ -55,6 +67,7 @@ private:
     uint8_t registryRequestAttempts = 0;      // Wie oft schon versucht
     bool registryReceived = false;            // Wurde eine Registry empfangen?
     uint8_t motor_rpm = 0; // Motor RPM, initialisiert auf 0
+    Adafruit_SSD1306 display;
 
     void updateDisplay();
     void updateLED();
