@@ -53,12 +53,13 @@ enum ControlCommandType {
 };
 
 enum ModuleMode : uint8_t {
-    MODE_AUTOMATIK = 0,
-    MODE_TAGESZYKLUS = 1,
-    MODE_NACHTZYKLUS = 2,
-    MODE_TAGNACHTZYKLUS = 3,
-    MODE_INTERAKTIV = 4,
-    MODE_PAUSE = 5
+    MODE_WAIT_FOR_REGISTRY,
+    MODE_AUTOMATIK,
+    MODE_TAGESZYKLUS,
+    MODE_NACHTZYKLUS,
+    MODE_TAGNACHTZYKLUS,
+    MODE_INTERAKTIV,
+    MODE_PAUSE
 };
 
 struct ControlCommand {

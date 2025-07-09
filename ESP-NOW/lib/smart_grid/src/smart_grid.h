@@ -20,7 +20,7 @@ public:
     bool addPeerIfNew(const uint8_t* macAddress, ModuleType type = MODULE_SOLAR);
     void sendModuleRegistryToPeer(const uint8_t* receiverMac);
     void handleReceivedModuleRegistry(const uint8_t* incomingData);
-    void handleJoinMessage(const JoinMessage& joinMsg);
+    void handleJoinMessage(const JoinMessageWithType& joinMsg);
     void handleControlCommand(const uint8_t* macAddress, ControlCommand command);
     void handleReceivedSmartGridDataRaw(const uint8_t* rawData, int len, JsonDocument& doc);
     bool jsonToSmartGrid(const JsonDocument& json, SmartGridData* data);
@@ -30,6 +30,7 @@ public:
     void sendRegistryRequest();
     void tryRequestRegistry();
     void begin();
+    void runWaitForRegistry();
 
     void update();
 
@@ -47,12 +48,18 @@ private:
     SmartGridData smartGridData;
     ModuleRegistry moduleRegistry;
     StaticJsonDocument<256> doc;
-    ModuleMode currentMode = MODE_AUTOMATIK; // Standardmodus
+    ModuleMode currentMode = MODE_WAIT_FOR_REGISTRY; // Standardmodus
     uint8_t newPeerCount = 0;                // Wie bisher: zählt neue Peers
     uint8_t receivedRegistryRequests = 0;     // Zählt empfangene RegistryRequests
     unsigned long lastRegistryRequestTime = 0; // Für Timing
     uint8_t registryRequestAttempts = 0;      // Wie oft schon versucht
     bool registryReceived = false;            // Wurde eine Registry empfangen?
+    uint8_t motor_rpm = 0; // Motor RPM, initialisiert auf 0
+
+    void updateDisplay();
+    void updateLED();
+    void updateMotor();
+    void readSolarcell();
 
     void runAutomatik();
     void runTageszyklus();

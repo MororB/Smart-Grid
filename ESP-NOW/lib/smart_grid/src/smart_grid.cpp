@@ -65,18 +65,49 @@ void SmartGrid::sendControlCommand(const uint8_t* receiverMac, const ControlComm
 
 void SmartGrid::handleReceivedModuleRegistry(const uint8_t* incomingData) {
     registryReceived = true;
-    const ModuleRegistry* receivedRegistry = (const ModuleRegistry*)incomingData;
-    for (int i = 0; i < receivedRegistry->count && i < MAX_MODULES; ++i) {
-        addPeerIfNew(receivedRegistry->modules[i].mac, receivedRegistry->modules[i].type);
+    ModuleRegistryMessage msg;
+    memcpy(&msg, incomingData, sizeof(msg));
+    //const ModuleRegistry* receivedRegistry = (const ModuleRegistry*)incomingData;
+    for (int i = 0; i < msg.registry.count && i < MAX_MODULES; ++i) {
+        addPeerIfNew(msg.registry.modules[i].mac, msg.registry.modules[i].type);
     }
 }
 
-void SmartGrid::handleJoinMessage(const JoinMessage& joinMsg) {
-    addPeerIfNew(joinMsg.mac, static_cast<ModuleType>(joinMsg.module_type));
+void SmartGrid::handleJoinMessage(const JoinMessageWithType& joinMsg) {
+    newPeerCount++; // Zähler erhöhen
+    addPeerIfNew(joinMsg.join.mac, static_cast<ModuleType>(joinMsg.type));
 }
 
 void SmartGrid::handleControlCommand(const uint8_t* macAddress, ControlCommand command) {
     // Implementiere nach Bedarf
+    Serial.print("Empfange ControlCommand");
+
+    switch (command.type)  // Beispiel für die Verarbeitung von ControlCommand
+    {
+    case ControlCommandType::SET_MODE:
+        Serial.print("Setze Modus auf: ");
+        Serial.println(command.mode);
+        setCurrentMode(command.mode);
+        break;
+    case ControlCommandType::REQUEST_STATUS:
+        Serial.println("Status angefordert");
+        sendSmartGridData(macAddress);
+        Serial.println("Sende SmartGridData an anfragendes Modul");
+        break;
+    case ControlCommandType::SET_STATUS:
+        Serial.println("Setze SmartGridData Status");
+        if (jsonToSmartGrid(doc, &command.statusOverride)) {
+            setSmartGridData(command.statusOverride);
+            Serial.println("SmartGridData erfolgreich gesetzt");
+        } else {
+            Serial.println("Fehler beim Setzen von SmartGridData");
+        }
+        break;    
+    
+    default:
+        Serial.println("Unbekannter ControlCommand-Typ!");
+        break;
+    }
 }
 
 void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingData, int len) {
@@ -99,13 +130,14 @@ void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingDat
             handleReceivedSmartGridDataRaw(incomingData, len, doc);
             break;
         case MSG_JOIN: {
-            JoinMessage joinMsg;
-            memcpy(&joinMsg, incomingData, sizeof(JoinMessage));
+            JoinMessageWithType joinMsg;
+            memcpy(&joinMsg, incomingData, sizeof(JoinMessageWithType));
             handleJoinMessage(joinMsg);
             printKnownPeers();
             break;
         }
         case MSG_MODULE_REGISTRY:
+        Serial.println("Empfange Module Registry...");
             handleReceivedModuleRegistry(incomingData);
             printKnownPeers();
             break;
@@ -126,6 +158,9 @@ void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingDat
             Serial.print("Anzahl empfangener RegistryRequests: ");
             Serial.println(receivedRegistryRequests);
 
+            addPeerIfNew(req.requesterMac, MODULE_CAR);
+
+
             uint8_t myMac[6];
             WiFi.macAddress(myMac);
 
@@ -143,29 +178,12 @@ void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingDat
             }
             Serial.println();
 
-            int responderIndex = moduleRegistry.count - receivedRegistryRequests;
-            Serial.print("Berechneter responderIndex: ");
-            Serial.println(responderIndex);
-
-            if (responderIndex >= 0 && responderIndex < moduleRegistry.count) {
-                Serial.print("Vergleiche MAC von Modul ");
-                Serial.print(responderIndex + 1);
-                Serial.print(": ");
-                for (int i = 0; i < 6; ++i) {
-                    Serial.printf("%02X", moduleRegistry.modules[responderIndex].mac[i]);
-                    if (i < 5) Serial.print(":");
-                }
-                Serial.println();
-
-                if (memcmp(moduleRegistry.modules[responderIndex].mac, myMac, 6) == 0 &&
-                    memcmp(req.requesterMac, myMac, 6) != 0) {
-                    Serial.printf("Modul %d antwortet auf RegistryRequest (Request #%d)\n", responderIndex + 1, receivedRegistryRequests);
-                    sendModuleRegistryToPeer(req.requesterMac);
-                } else {
-                    Serial.println("Dieses Modul ist nicht an der Reihe zu antworten oder Anfrage kommt von mir selbst.");
-                }
-            } else {
-                Serial.println("responderIndex außerhalb des gültigen Bereichs!");
+            if(newPeerCount - receivedRegistryRequests == 0){
+                sendModuleRegistryToPeer(req.requesterMac);
+                Serial.println("Sende Registry an anfragendes Modul");
+            }
+            else {
+                Serial.println("Keine Registry gesendet, da ich nicht an der der Reihe bin");
             }
             break;
         }
@@ -203,8 +221,6 @@ bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, ModuleType type) {
     moduleRegistry.modules[moduleRegistry.count].type = type;
     moduleRegistry.count++;
 
-    newPeerCount++; // Zähler erhöhen
-
     esp_now_peer_info_t peerInfo{};
     memcpy(peerInfo.peer_addr, macAddress, 6);
     peerInfo.channel = 0;
@@ -212,6 +228,13 @@ bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, ModuleType type) {
     if (!esp_now_is_peer_exist(macAddress)) {
         esp_now_add_peer(&peerInfo);
     }
+
+    Serial.print("New peer MAC: ");
+    for (int i = 0; i < 6; ++i) {
+        Serial.printf("%02X", macAddress[i]);
+        if (i < 5) Serial.print(":");
+    }
+    Serial.println();
 
     // Wenn dies der erste neue Peer ist, Registry senden
     if (newPeerCount == 1) {
@@ -290,8 +313,33 @@ void SmartGrid::setCurrentMode(ModuleMode mode) {
     currentMode = mode;
 }
 
+void SmartGrid::updateDisplay() {
+    Serial.println("Aktualisiere Display...");
+    
+}
+
+void SmartGrid::updateLED() {
+    Serial.println("Aktualisiere LED...");
+    
+}
+
+void SmartGrid::updateMotor() {
+    Serial.println("Aktualisiere Motor...");
+    motor_rpm = (motor_rpm + 100) % 1000; // Beispiel: RPM erhöhen und zurücksetzen bei 1000
+    Serial.print("Motor RPM: ");
+    Serial.println(motor_rpm);
+}
+
+void SmartGrid::readSolarcell() {
+    Serial.println("Aktualisiere Solarmodul...");
+    // Hier könnte Logik für das Auslesen des Solarmoduls implementiert werden
+}
+
 void SmartGrid::update() {
     switch (currentMode) {
+        case MODE_WAIT_FOR_REGISTRY:
+            runWaitForRegistry();
+            break;
         case MODE_AUTOMATIK:
             runAutomatik();
             break;
@@ -318,35 +366,273 @@ void SmartGrid::update() {
 
 // Beispiel für eine modusspezifische Funktion
 void SmartGrid::runInteraktiv() {
-    //int analogValue = analogRead(A0); // Beispiel: Wert einlesen
-    //smartGridData.current_consumption = analogValue * 0.01f; // Beispiel: Wert umrechnen
-    // ...weitere Logik...
-    Serial.println("Interaktiver Modus läuft...");
+
+    switch (myModuleType)
+    {
+    case MODULE_WIND:
+        // Logik für Windmodul
+        updateMotor();
+        break;
+    case MODULE_SOLAR:
+        // Logik für Solarmodul
+        readSolarcell();
+        break;
+    case MODULE_BATTERY:
+        // Logik für Batteriespeicher
+        break;
+    case MODULE_HYDRO:
+        // Logik für Wasserkraftmodul
+        break;
+    case MODULE_ELECTROLYZER:
+        // Logik für Elektrolyseur
+        break;
+    case MODULE_HYDROGEN:
+        // Logik für Wasserstoffmodul
+        break;
+    case MODULE_PUMP_STORAGE:
+        // Logik für Pumpspeicherkraftwerk
+        break;
+    case MODULE_HOUSE:
+        // Logik für Hausmodul
+        break;  
+    case MODULE_FACTORY:
+        // Logik für Fabrikmodul
+        break;
+    case MODULE_CAR:
+        // Logik für Automodul
+        break;
+    case MODULE_SUBSTATION:
+        // Logik für Umspannwerk
+        break;
+    case MODULE_MASTER:
+        // Logik für Master-Modul
+        break;
+    default:
+        break;
+    }
+
+    updateDisplay();
+    updateLED();
 }
 
 void SmartGrid::runAutomatik() {
-    // TODO: Automatik-Modus-Logik hier implementieren
-    Serial.println("Automatik-Modus läuft...");
+     switch (myModuleType)
+    {
+    case MODULE_WIND:
+        // Logik für Windmodul
+        break;
+    case MODULE_SOLAR:
+        // Logik für Solarmodul
+        break;
+    case MODULE_BATTERY:
+        // Logik für Batteriespeicher
+        break;
+    case MODULE_HYDRO:
+        // Logik für Wasserkraftmodul
+        break;
+    case MODULE_ELECTROLYZER:
+        // Logik für Elektrolyseur
+        break;
+    case MODULE_HYDROGEN:
+        // Logik für Wasserstoffmodul
+        break;
+    case MODULE_PUMP_STORAGE:
+        // Logik für Pumpspeicherkraftwerk
+        break;
+    case MODULE_HOUSE:
+        // Logik für Hausmodul
+        break;  
+    case MODULE_FACTORY:
+        // Logik für Fabrikmodul
+        break;
+    case MODULE_CAR:
+        // Logik für Automodul
+        break;
+    case MODULE_SUBSTATION:
+        // Logik für Umspannwerk
+        break;
+    case MODULE_MASTER:
+        // Logik für Master-Modul
+        break;
+    default:
+        break;
+    }
 }
 
 void SmartGrid::runTageszyklus() {
-    // TODO: Tageszyklus-Modus-Logik hier implementieren
-    Serial.println("Tageszyklus-Modus läuft...");
+     switch (myModuleType)
+    {
+    case MODULE_WIND:
+        // Logik für Windmodul
+        break;
+    case MODULE_SOLAR:
+        // Logik für Solarmodul
+        break;
+    case MODULE_BATTERY:
+        // Logik für Batteriespeicher
+        break;
+    case MODULE_HYDRO:
+        // Logik für Wasserkraftmodul
+        break;
+    case MODULE_ELECTROLYZER:
+        // Logik für Elektrolyseur
+        break;
+    case MODULE_HYDROGEN:
+        // Logik für Wasserstoffmodul
+        break;
+    case MODULE_PUMP_STORAGE:
+        // Logik für Pumpspeicherkraftwerk
+        break;
+    case MODULE_HOUSE:
+        // Logik für Hausmodul
+        break;  
+    case MODULE_FACTORY:
+        // Logik für Fabrikmodul
+        break;
+    case MODULE_CAR:
+        // Logik für Automodul
+        break;
+    case MODULE_SUBSTATION:
+        // Logik für Umspannwerk
+        break;
+    case MODULE_MASTER:
+        // Logik für Master-Modul
+        break;
+    default:
+        break;
+    }
 }
 
 void SmartGrid::runNachtzyklus() {
-    // TODO: Nachtzyklus-Modus-Logik hier implementieren
-    Serial.println("Nachtzyklus-Modus läuft...");
+     switch (myModuleType)
+    {
+    case MODULE_WIND:
+        // Logik für Windmodul
+        break;
+    case MODULE_SOLAR:
+        // Logik für Solarmodul
+        break;
+    case MODULE_BATTERY:
+        // Logik für Batteriespeicher
+        break;
+    case MODULE_HYDRO:
+        // Logik für Wasserkraftmodul
+        break;
+    case MODULE_ELECTROLYZER:
+        // Logik für Elektrolyseur
+        break;
+    case MODULE_HYDROGEN:
+        // Logik für Wasserstoffmodul
+        break;
+    case MODULE_PUMP_STORAGE:
+        // Logik für Pumpspeicherkraftwerk
+        break;
+    case MODULE_HOUSE:
+        // Logik für Hausmodul
+        break;  
+    case MODULE_FACTORY:
+        // Logik für Fabrikmodul
+        break;
+    case MODULE_CAR:
+        // Logik für Automodul
+        break;
+    case MODULE_SUBSTATION:
+        // Logik für Umspannwerk
+        break;
+    case MODULE_MASTER:
+        // Logik für Master-Modul
+        break;
+    default:
+        break;
+    }
 }
 
 void SmartGrid::runTagNachtzyklus() {
-    // TODO: TagNachtZyklus-Modus-Logik hier implementieren
-    Serial.println("TagNachtZyklus-Modus läuft...");
+     switch (myModuleType)
+    {
+    case MODULE_WIND:
+        // Logik für Windmodul
+        break;
+    case MODULE_SOLAR:
+        // Logik für Solarmodul
+        break;
+    case MODULE_BATTERY:
+        // Logik für Batteriespeicher
+        break;
+    case MODULE_HYDRO:
+        // Logik für Wasserkraftmodul
+        break;
+    case MODULE_ELECTROLYZER:
+        // Logik für Elektrolyseur
+        break;
+    case MODULE_HYDROGEN:
+        // Logik für Wasserstoffmodul
+        break;
+    case MODULE_PUMP_STORAGE:
+        // Logik für Pumpspeicherkraftwerk
+        break;
+    case MODULE_HOUSE:
+        // Logik für Hausmodul
+        break;  
+    case MODULE_FACTORY:
+        // Logik für Fabrikmodul
+        break;
+    case MODULE_CAR:
+        // Logik für Automodul
+        break;
+    case MODULE_SUBSTATION:
+        // Logik für Umspannwerk
+        break;
+    case MODULE_MASTER:
+        // Logik für Master-Modul
+        break;
+    default:
+        break;
+    }
 }
 
 void SmartGrid::runPause() {
-    // TODO: Pause-Modus-Logik hier implementieren
-    Serial.println("Pause-Modus läuft...");
+     switch (myModuleType)
+    {
+    case MODULE_WIND:
+        // Logik für Windmodul
+        break;
+    case MODULE_SOLAR:
+        // Logik für Solarmodul
+        break;
+    case MODULE_BATTERY:
+        // Logik für Batteriespeicher
+        break;
+    case MODULE_HYDRO:
+        // Logik für Wasserkraftmodul
+        break;
+    case MODULE_ELECTROLYZER:
+        // Logik für Elektrolyseur
+        break;
+    case MODULE_HYDROGEN:
+        // Logik für Wasserstoffmodul
+        break;
+    case MODULE_PUMP_STORAGE:
+        // Logik für Pumpspeicherkraftwerk
+        break;
+    case MODULE_HOUSE:
+        // Logik für Hausmodul
+        break;  
+    case MODULE_FACTORY:
+        // Logik für Fabrikmodul
+        break;
+    case MODULE_CAR:
+        // Logik für Automodul
+        break;
+    case MODULE_SUBSTATION:
+        // Logik für Umspannwerk
+        break;
+    case MODULE_MASTER:
+        // Logik für Master-Modul
+        break;
+    default:
+        break;
+    }
 }
 
 void SmartGrid::sendRegistryRequest() {
@@ -389,17 +675,18 @@ void SmartGrid::begin() {
 
     Serial.println("SmartGrid Initialisierung gestartet. Warte auf Registry...");
 
-    // Warte, bis Registry empfangen wurde oder Modul als erstes erkannt wird
-    while (!registryReceived && registryRequestAttempts < 3) {
-        tryRequestRegistry();
-        delay(100); // Kurze Pause, damit die Schleife nicht zu schnell läuft
-    }
+    delay(1000); // Kurze Pause, um sicherzustellen, dass das System bereit ist
 
+}
+
+void SmartGrid::runWaitForRegistry() {
+    tryRequestRegistry();
     if (registryReceived) {
         Serial.println("Registry erfolgreich empfangen!");
-    } else {
+        setCurrentMode(MODE_AUTOMATIK); // oder dein gewünschter Startmodus
+    } else if (registryRequestAttempts >= 3) {
         Serial.println("Keine Registry erhalten. Ich bin das erste Modul im Netzwerk.");
-        // Hier ggf. spezielle Initialisierung
+        setCurrentMode(MODE_AUTOMATIK); // oder dein gewünschter Startmodus
     }
 }
 

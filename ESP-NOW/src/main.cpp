@@ -5,6 +5,7 @@ const ModuleType myModuleType = MODULE_WIND;
 SmartGrid smartGrid(myModuleType);
 
 void onReceiveCallback(const uint8_t *mac, const uint8_t *incomingData, int len) {
+    //Serial.print("Hab was empfangen");
     smartGrid.onReceiveCallback(mac, incomingData, len);
 }
 
@@ -20,13 +21,12 @@ void setup() {
 
     smartGrid.begin();
     delay(1000); // Kurze Pause, um sicherzustellen, dass alles initialisiert ist
-    //smartGrid.sendJoinMessage();
     Serial.println("SmartGrid initialisiert und bereit.");
 }
 
 void loop() {
     //SmartGridData data = smartGrid.getSmartGridData();
-    //smartGrid.update();
-    delay(10000); // Update alle 10 Sekunden
+    smartGrid.update();
+    delay(10); // Update alle 10 Sekunden
 
 }
