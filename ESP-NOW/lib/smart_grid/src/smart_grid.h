@@ -8,13 +8,15 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <FastLED.h>
 #include "smart_grid_types.h"
 
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+#define NUM_LEDS 22
+#define DATA_PIN 27
 
 
 
@@ -35,6 +37,7 @@ public:
     void handleJoinMessage(const JoinMessageWithType& joinMsg);
     void handleControlCommand(const uint8_t* macAddress, ControlCommand command);
     void handleReceivedSmartGridDataRaw(const uint8_t* rawData, int len, JsonDocument& doc);
+    void handleRecivedSmartGridData(const uint8_t* mac, const uint8_t* incomingData, int len);
     bool jsonToSmartGrid(const JsonDocument& json, SmartGridData* data);
     void smartGridToJson(const SmartGridData* data, JsonDocument& json);
     void sendControlCommand(const uint8_t* receiverMac, const ControlCommand& command);
@@ -68,11 +71,18 @@ private:
     bool registryReceived = false;            // Wurde eine Registry empfangen?
     uint8_t motor_rpm = 0; // Motor RPM, initialisiert auf 0
     Adafruit_SSD1306 display;
+    CRGB leds[NUM_LEDS]; // LED-Array für FastLED
+    bool newData = true;
+    bool dataChanged = false; // Flag, ob sich die Daten geändert haben
+    uint8_t own_mac[6];
 
     void updateDisplay();
     void updateLED();
     void updateMotor();
     void readSolarcell();
+    void computeNetworkStatus();
+    bool checkForChanges();
+    void sendNewSmartGridData();
 
     void runAutomatik();
     void runTageszyklus();

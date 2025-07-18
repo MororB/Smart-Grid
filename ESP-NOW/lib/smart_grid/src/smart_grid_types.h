@@ -69,29 +69,46 @@ struct ControlCommand {
     SmartGridData statusOverride;
 };
 
-struct ModuleInfo {
-    uint8_t mac[6];
-    ModuleType type;
+// struct ModuleInfo {
+//     uint8_t mac[6];
+//     ModuleType type;
+// };
+
+// struct ModuleRegistry {
+//     ModuleInfo modules[MAX_MODULES];
+//     uint8_t count;
+// };
+
+struct ModuleState {
+    uint8_t       mac[6];               // Peer-MAC
+    ModuleType    type;                 // Peer-Typ
+    SmartGridData data;                 // zuletzt empfangene Messwerte
+
+        // Netz‑Status (wird von computeNetworkStatus() befüllt)
+    float         net;        // data.generation - data.consumption
+    uint8_t       brightness; // 0…255
+    CRGB          color;      // Grün bei Überschuss, Rot bei Defizit
 };
 
 struct ModuleRegistry {
-    ModuleInfo modules[MAX_MODULES];
-    uint8_t count;
+    ModuleState modules[MAX_MODULES];
+    uint8_t     count;
 };
 
-
+struct SingleModuleRegistry {
+    ModuleState modules;
+    uint8_t     count;
+};
 
 enum MessageType : uint8_t {
     MSG_SMARTGRID_DATA = 1,
     MSG_JOIN = 2,
     MSG_MODULE_REGISTRY = 3,
     MSG_CONTROL_COMMAND = 4,
-    MSG_REGISTRY_REQUEST = 5
+    MSG_REGISTRY_REQUEST = 5,
+    MSG_SINGLE_MODULE_REGISTRY = 6
 };
 
-struct MessageHeader {
-    MessageType type;
-};
 
 static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 //static ModuleRegistry moduleRegistry = { {}, 0 };
@@ -99,29 +116,35 @@ extern ModuleRegistry moduleRegistry;
 extern SmartGridData smartGridData;
 
 struct SmartGridDataMessage {
-    MessageType type;
+    MessageType type = MSG_SMARTGRID_DATA;
     SmartGridData data;
 };
 
 struct JoinMessageWithType {
-    MessageType type;
+    MessageType type = MSG_JOIN;
     JoinMessage join;
 };
 
 struct ModuleRegistryMessage {
-    MessageType type;
+    MessageType type = MSG_MODULE_REGISTRY;
     ModuleRegistry registry;
 };
 
 struct ControlCommandMessage {
-    MessageType type;
+    MessageType type = MSG_CONTROL_COMMAND;
     ControlCommand command;
 };
 
 struct RegistryRequestMessage {
-    MessageType type;
+    MessageType type = MSG_REGISTRY_REQUEST;
     uint8_t requesterMac[6];
 };
+
+struct SingleModuleRegistryMessage {
+    MessageType type = MSG_SINGLE_MODULE_REGISTRY;
+    SingleModuleRegistry registry;
+};
+
 
 
 #endif
