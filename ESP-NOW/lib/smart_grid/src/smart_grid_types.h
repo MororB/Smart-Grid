@@ -49,7 +49,9 @@ struct JoinMessage {
 enum ControlCommandType {
     SET_MODE,
     REQUEST_STATUS,
-    SET_STATUS
+    SET_STATUS,
+    MODE_NEXT_STEP,
+    MODIFY_MODE
 };
 
 enum ModuleMode : uint8_t {
@@ -62,11 +64,24 @@ enum ModuleMode : uint8_t {
     MODE_PAUSE
 };
 
+#define MAX_ANCHOR_POINTS 20 // Maximale Anzahl an Ankerpunkten für Profile
+
+struct profileMessage {
+    //ModuleMode mode; // statt uint8_t mode
+    bool consOrGen; // true = Verbrauch, false = Erzeugung
+    uint8_t nAnchorPoints; // Anzahl der Ankerpunkte
+    uint16_t anchorPoints[MAX_ANCHOR_POINTS]; // Ankerpunkte (max. 10)
+    uint8_t interpolationpoints; // Anzahl der Interpolationspunkte
+    uint16_t cycleDuration; // Zyklusdauer in Sekunden
+};
+
 struct ControlCommand {
     uint8_t targetMac[6];
     ControlCommandType type;
     ModuleMode mode; // statt uint8_t mode
     SmartGridData statusOverride;
+    profileMessage profile; // Profilinformationen
+
 };
 
 // struct ModuleInfo {

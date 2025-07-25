@@ -594,11 +594,12 @@ void SmartGrid::processUartCommand_(const String &line) {
     ControlCommand cc{};
     uint8_t mac[6];
 
-    if (strcmp(cmd, "set_mode") == 0) {
-        // { "cmd":"set_mode", "mac":"AA:BB:CC:DD:EE:FF", "mode":5 }
-        const char* macStr = doc["mac"];
+    const char* macStr = doc["mac"];
         for (int i = 0; i < 6; ++i)
             mac[i] = strtoul(macStr + 3*i, nullptr, 16);
+
+    if (strcmp(cmd, "set_mode") == 0) {
+        // { "cmd":"set_mode", "mac":"AA:BB:CC:DD:EE:FF", "mode":5 }
         cc.type = ControlCommandType::SET_MODE;
         cc.mode = static_cast<ModuleMode>(doc["mode"].as<int>());
 
@@ -607,9 +608,6 @@ void SmartGrid::processUartCommand_(const String &line) {
     }
     else if (strcmp(cmd, "request_status") == 0) {
         // { "cmd":"request_status", "mac":"AA:BB:CC:DD:EE:FF" }
-        const char* macStr = doc["mac"];
-        for (int i = 0; i < 6; ++i)
-            mac[i] = strtoul(macStr + 3*i, nullptr, 16);
         cc.type = ControlCommandType::REQUEST_STATUS;
 
         masterRequest = true; // Setze Flag, dass Master den Status anfordert
@@ -618,9 +616,6 @@ void SmartGrid::processUartCommand_(const String &line) {
     }
     else if (strcmp(cmd, "set_status") == 0) {
         // { "cmd":"set_status", "data":{…} }
-        const char* macStr = doc["mac"];
-        for (int i = 0; i < 6; ++i)
-            mac[i] = strtoul(macStr + 3*i, nullptr, 16);
         SmartGridData d;
         d.timestamp = doc["timestamp"].as<uint32_t>();
         d.id = doc["id"].as<uint8_t>();
@@ -655,6 +650,31 @@ void SmartGrid::processUartCommand_(const String &line) {
             // Beispiel: broadcast an alle Master-Peers
             sendControlCommand(mac, cc);
             Serial2.println(R"({"cmd":"ack","on":"set_status"})");
+    }
+    else if(strcmp(cmd, "mode_next_step") == 0){
+
+        Serial.println("Wechsel zum nächsten Modus...");
+        cc.type = ControlCommandType::MODE_NEXT_STEP;
+        sendControlCommand(BROADCAST_MAC, cc);
+
+    }
+    else if(strcmp(cmd,"modify_mode") == 0){
+        // { "cmd":"modify_mode", "mode":5 }
+        cc.type = ControlCommandType::MODIFY_MODE;
+        const char* macStr = doc["mac"];
+        //cc.mode = 
+        cc.profile.nAnchorPoints = doc["n_anchor_points"].as<uint8_t>();
+        cc.profile.cycleDuration = doc["cycle_duration"].as<uint16_t>();
+        cc.profile.interpolationpoints = doc["interpolation_points"].as<uint8_t>();
+        JsonArray arr = doc["anchor_points"].as<JsonArray>();
+        size_t count = MAX_ANCHOR_POINTS;
+        for (size_t i = 0; i < count; ++i) {
+        // arr[i] kann float, int, etc. sein
+            cc.profile.anchorPoints[i] = arr[i].as<float>();
+        }
+
+        sendControlCommand(mac, cc);
+        Serial2.println(R"({"cmd":"ack","on":"modify_mode"})");
     }
     else {
         Serial2.println(R"({"cmd":"error","why":"unknown_cmd"})");

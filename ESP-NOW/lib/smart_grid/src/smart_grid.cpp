@@ -73,10 +73,9 @@ void SmartGrid::handleReceivedModuleRegistry(const uint8_t* incomingData) {
     SingleModuleRegistryMessage msg;
     memcpy(&msg, incomingData, sizeof(msg));
     //const ModuleRegistry* receivedRegistry = (const ModuleRegistry*)incomingData;
-    for (int i = 0; i < msg.registry.count && i < MAX_MODULES; ++i) {
-        addPeerIfNew(msg.registry.modules.mac, msg.registry.modules.type);
-        computeNetworkStatus();
-    }
+    addPeerIfNew(msg.registry.modules.mac, msg.registry.modules.type);
+    computeNetworkStatus();
+    
 }
 
 void SmartGrid::handleJoinMessage(const JoinMessageWithType& joinMsg) {
@@ -87,6 +86,8 @@ void SmartGrid::handleJoinMessage(const JoinMessageWithType& joinMsg) {
 void SmartGrid::handleControlCommand(const uint8_t* macAddress, ControlCommand command) {
     // Implementiere nach Bedarf
     Serial.print("Empfange ControlCommand");
+    Serial.print(" ID");
+    Serial.print(command.type);
 
     switch (command.type)  // Beispiel für die Verarbeitung von ControlCommand
     {
@@ -122,10 +123,38 @@ void SmartGrid::handleControlCommand(const uint8_t* macAddress, ControlCommand c
         Serial.println(command.statusOverride.coordinates.y);
         Serial.print("Error: ");
         Serial.println(command.statusOverride.error);
-        dataChanged = true; // Markiere, dass sich die Daten geändert haben
+        //dataChanged = true; // Markiere, dass sich die Daten geändert haben
         Serial.println("SmartGridData erfolgreich gesetzt");
         break;    
     
+    case ControlCommandType::MODE_NEXT_STEP:
+        Serial.println("Nächster Schritt im Modus");
+        modeMakeStep = true; // Setze Flag, dass der Modus einen Schritt machen soll
+        break;
+
+    case ControlCommandType::MODIFY_MODE:{
+        Serial.println("Modifiziere Modus");
+
+        if (command.profile.consOrGen == true) {
+            Serial.println("Verbrauchsprofil empfangen");
+            consAnchors.assign(command.profile.anchorPoints, command.profile.anchorPoints + command.profile.nAnchorPoints);
+        } else {
+            Serial.println("Erzeugungsprofil empfangen");
+            genAnchors.assign(command.profile.anchorPoints, command.profile.anchorPoints + command.profile.nAnchorPoints);
+        }
+
+        uint8_t npoint = command.profile.interpolationpoints;
+        profileSize = npoint; // Setze die Größe des Profils
+
+        setDailyProfiles(consAnchors, genAnchors, npoint, cycleDurationMs);
+        Serial.print("Anzahl Ankerpunkte: ");
+        Serial.println(command.profile.nAnchorPoints);
+        Serial.print("Anzahl Interpolationspunkte: ");
+        Serial.println(command.profile.interpolationpoints);
+        Serial.print("Zyklusdauer: ");
+        Serial.println(command.profile.cycleDuration);
+        break;
+    }
     default:
         Serial.println("Unbekannter ControlCommand-Typ!");
         break;
@@ -164,7 +193,6 @@ void SmartGrid::handleRecivedSmartGridData(const uint8_t* mac, const uint8_t* in
         if (memcmp(moduleRegistry.modules[i].mac, mac, 6) == 0) {
             // Update die Daten des Moduls
             moduleRegistry.modules[i].data = msg.data;
-            computeNetworkStatus();
             found = true;
             newData = true; // Markiere, dass neue Daten empfangen wurden
             break;
@@ -266,7 +294,7 @@ void SmartGrid::printKnownPeers() const {
     Serial.println("Bekannte Module:");
     for (int i = 0; i < moduleRegistry.count; i++) {
         Serial.print("Modul ");
-        Serial.print(i + 1);
+        Serial.print(moduleRegistry.modules[i].data.id);
         Serial.print(" (Typ ");
         Serial.print(moduleRegistry.modules[i].type);
         Serial.print("): ");
@@ -292,11 +320,17 @@ bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, ModuleType type) {
     }
 
     // 3) Neuen Eintrag anlegen
+    Serial.print("ADD TYPE:");
+    Serial.println(type);
+    uint8_t newId = moduleRegistry.count + 1;
     ModuleState& m = moduleRegistry.modules[moduleRegistry.count++];
     memcpy(m.mac, macAddress, 6);
-    m.type = type;
+    moduleRegistry.modules[moduleRegistry.count].type = type;
+    moduleRegistry.modules[moduleRegistry.count].data.id = newId; // ID setzen
+    m.data.module = type; // Modultyp setzen
+
     // Modul-Daten auf 0 setzen (falls du Default-Werte möchtest)
-    m.data = SmartGridData{ /* das leert alle Felder */ };
+    //m.data = SmartGridData{ /* das leert alle Felder */ };
 
     // 4) ESP-NOW Peer eintragen
     esp_now_peer_info_t peerInfo{};
@@ -315,6 +349,8 @@ bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, ModuleType type) {
     }
     Serial.print("  Typ=");
     Serial.println(type);
+    Serial.print("  ID=");
+    Serial.println(newId);
 
     // 6) Erstes Peer → Registry senden
     if (newPeerCount == 1) {
@@ -391,14 +427,38 @@ void SmartGrid::computeNetworkStatus() {
     // Berechne den Netzstatus für jedes Modul
     Serial.println("Berechne Netzstatus...");
     float maxAbs = 0;
+
+    int ownIndex = -1;
+    for (int j = 0; j < moduleRegistry.count && j < MAX_MODULES; ++j) {
+        if (memcmp(moduleRegistry.modules[j].mac, own_mac, 6) == 0) {
+            ownIndex = j;
+            break;
+        }
+    }
+    if (ownIndex == -1) {
+        Serial.println("Eigenes Modul nicht gefunden!");
+        return; // Eigenes Modul nicht gefunden, Abbruch
+    }
+
+    smartGridData.id = moduleRegistry.modules[ownIndex].data.id; // Setze ID des eigenen Moduls
+    //smartGridData.module = moduleRegistry.modules[ownIndex].type; // Setze Modultyp des eigenen Moduls
+
+
     for (int i = 0; i < moduleRegistry.count; ++i) {
         auto& s = moduleRegistry.modules[i];
         s.net = s.data.current_generation - s.data.current_consumption;
         maxAbs = max(maxAbs, fabs(s.net));
     }
+
     for (int i = 0; i < moduleRegistry.count; ++i) {
         auto& s = moduleRegistry.modules[i];
-        s.brightness =  (uint8_t)((fabs(s.net) / maxAbs) * 255);
+        if (s.net == 0){
+            s.brightness = 0;
+        }
+        else{
+            s.brightness =  (uint8_t)((fabs(s.net) / maxAbs) * 255);            
+        }
+
         Serial.print("Modul ");
         Serial.print(i);
         Serial.print(" - Netzstatus: ");
@@ -424,12 +484,14 @@ bool SmartGrid::checkForChanges() {
         // computeNetworkStatus();
         // updateDisplay();
         // updateLED();
+        computeNetworkStatus();
         newData = false; // Nach der Aktualisierung zurücksetzen
         changed = true;
     }
 
     if (dataChanged) {
         sendNewSmartGridData();
+        computeNetworkStatus();
         dataChanged = false; // Nach dem Senden zurücksetzen
         changed = true; // Daten haben sich geändert
     }
@@ -441,6 +503,7 @@ void SmartGrid::sendNewSmartGridData() {
     // Sende SmartGridData an alle bekannten Peers
     for (int i = 0; i < moduleRegistry.count; ++i) {
         sendSmartGridData(moduleRegistry.modules[i].mac);
+        delay(10);
     }
 }
 
@@ -509,6 +572,9 @@ void SmartGrid::updateLED() {
     //Serial.println(ownIndex);
     if (ownIndex == -1) return; // Eigenes Modul nicht gefunden
 
+    Serial.print("FARBE SET:");
+    Serial.print(moduleRegistry.modules[ownIndex].color[0]);
+
     // Setze alle LEDs entsprechend
     for (int i = 0; i < NUM_LEDS; i++) {
         leds[i] = moduleRegistry.modules[ownIndex].color;
@@ -565,11 +631,11 @@ void SmartGrid::runInteraktiv() {
     {
     case MODULE_WIND:
         // Logik für Windmodul
-        updateMotor();
+        //updateMotor();
         break;
     case MODULE_SOLAR:
         // Logik für Solarmodul
-        readSolarcell();
+        //readSolarcell();
         break;
     case MODULE_BATTERY:
         // Logik für Batteriespeicher
@@ -604,9 +670,16 @@ void SmartGrid::runInteraktiv() {
     default:
         break;
     }
-
-    updateDisplay();
-    updateLED();
+    unsigned long time = millis();
+    if(checkForChanges() || (time-last_update)>5000) {
+        // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
+        //sendNewSmartGridData();
+        Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
+        updateSystemTime();
+        updateDisplay();
+        updateLED();
+        last_update=millis();
+    }
 }
 
 void SmartGrid::runAutomatik() {
@@ -651,12 +724,16 @@ void SmartGrid::runAutomatik() {
     default:
         break;
     }
-    if(checkForChanges()) {
+    unsigned long time = millis();
+    if(checkForChanges() || (time-last_update)>5000) {
         // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
         //sendNewSmartGridData();
         Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
+        updateSystemTime();
         updateDisplay();
         updateLED();
+        printKnownPeers();
+        last_update=millis();
     }
 }
 
@@ -702,6 +779,35 @@ void SmartGrid::runTageszyklus() {
     default:
         break;
     }
+     uint32_t now = millis();
+  if (modeMakeStep) {
+    // nächsten Profil‑Punkt
+    SmartGridData data;
+    data = getSmartGridData();
+    data.current_consumption = consProfile[cycleIndex];
+    data.current_generation = genProfile[cycleIndex];
+    setSmartGridData(data);
+
+    // Ausgabe zu Debug
+    Serial.printf("Step %u: cons=%.1f, gen=%.1f\n",
+                  cycleIndex,
+                  data.current_consumption,
+                  data.current_generation);
+
+    // Index und Zeit updaten
+    cycleIndex = (cycleIndex + 1) % profileSize;
+    modeMakeStep = false; // Schritt wurde gemacht
+  }
+    unsigned long time = millis();
+    if(checkForChanges() || (time-last_update)>5000) {
+        // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
+        //sendNewSmartGridData();
+        Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
+        updateSystemTime();
+        updateDisplay();
+        updateLED();
+        last_update=millis();
+    }
 }
 
 void SmartGrid::runNachtzyklus() {
@@ -745,6 +851,15 @@ void SmartGrid::runNachtzyklus() {
         break;
     default:
         break;
+    }
+    unsigned long time = millis();
+    if(checkForChanges() || (time-last_update)>5000) {
+        // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
+        //sendNewSmartGridData();
+        Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
+        updateDisplay();
+        updateLED();
+        last_update=millis();
     }
 }
 
@@ -790,6 +905,15 @@ void SmartGrid::runTagNachtzyklus() {
     default:
         break;
     }
+    unsigned long time = millis();
+    if(checkForChanges() || (time-last_update)>5000) {
+        // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
+        //sendNewSmartGridData();
+        Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
+        updateDisplay();
+        updateLED();
+        last_update=millis();
+    }
 }
 
 void SmartGrid::runPause() {
@@ -834,6 +958,15 @@ void SmartGrid::runPause() {
     default:
         break;
     }
+    unsigned long time = millis();
+    if(checkForChanges() || (time-last_update)>5000) {
+        // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
+        //sendNewSmartGridData();
+        Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
+        updateDisplay();
+        updateLED();
+        last_update=millis();
+    }
 }
 
 void SmartGrid::sendRegistryRequest() {
@@ -870,6 +1003,16 @@ void SmartGrid::begin() {
     receivedRegistryRequests = 0;
     newPeerCount = 0;
     lastRegistryRequestTime = millis();
+    last_update = millis();
+    systemTimeStartMs = last_update;
+
+  // Beispiel‑Anker: zwei Verbrauchs‑Peaks, ein Erzeugungs‑Peak
+  std::vector<float> ca = { 5, 12,  8, 20, 10 };
+  std::vector<float> ga = { 0,  0, 25,  0,  0 };
+
+  // Setze Tageszyklus: 96 Punkte (viertel‑Stunden), 24 h Dauer
+  setDailyProfiles(ca, ga, /*outPoints=*/20, /*duration=*/20000);
+
 
     WiFi.macAddress(own_mac);
     Serial.print("Eigene MAC-Adresse: ");
@@ -881,6 +1024,8 @@ void SmartGrid::begin() {
     if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
     Serial.println(F("SSD1306 allocation failed"));
     }
+    Serial.println("module_type: " + String(myModuleType));
+    smartGridData.module = myModuleType; // Setze Modultyp
     
     display.clearDisplay();
 
@@ -906,8 +1051,84 @@ void SmartGrid::runWaitForRegistry() {
     }
 }
 
+void SmartGrid::updateSystemTime() {
+    // Berechne vergangene Sekunden seit Startzeitpunkt, robust gegen Überlauf
+    unsigned long now = millis();
+    uint32_t elapsed = (now - systemTimeStartMs) / 1000;
+    setSystemTime(elapsed);
+}
+
+void SmartGrid::setSystemTime(uint32_t time){
+
+    smartGridData.timestamp = time;
+}
+
+
+uint32_t SmartGrid::getSystemTime(){
+
+    return smartGridData.timestamp;
+}
 
 
 
+// Generiert ein Profil der Länge `outLen` aus `nAnchors` Anker‑Werten.
+// anchors[0…nAnchors-1] liegen gleichmäßig verteilt über den Zyklus;
+// profile[0…outLen-1] wird linear dazwischen interpoliert.
+void SmartGrid::generateInterpolatedProfile(const std::vector<float>& anchors,
+                                 std::vector<float>& profile)
+{
+  size_t nAnch = anchors.size();
+  size_t outLen = profile.size();
+  if (nAnch < 2 || outLen == 0) return;
+
+  for (size_t i = 0; i < outLen; i++) {
+    float pos = float(i) * (nAnch - 1) / float(outLen - 1);
+    size_t idx = size_t(floor(pos));
+    float frac = pos - idx;
+
+    if (idx + 1 < nAnch) {
+      profile[i] = anchors[idx] * (1.0f - frac)
+                 + anchors[idx+1] * frac;
+    } else {
+      profile[i] = anchors[nAnch - 1];
+    }
+  }
+}
 
 
+void SmartGrid::setDailyProfiles(const std::vector<float>& consAnch,
+                      const std::vector<float>& genAnch,
+                      size_t outPoints,
+                      uint32_t durationMs)
+{
+  // 1) Copy anchor definitions
+  consAnchors = consAnch;
+  genAnchors  = genAnch;
+
+  // 2) Resize profile arrays
+  consProfile.resize(outPoints);
+  genProfile .resize(outPoints);
+
+  // 3) Setze Zyklusdauer
+  cycleDurationMs = durationMs;
+  cycleIndex      = 0;
+  lastStepMs      = millis();
+
+  // 4) Erzeuge Profile
+  generateInterpolatedProfile(consAnchors, consProfile);
+  generateInterpolatedProfile(genAnchors,  genProfile);
+
+    Serial.print("Verbrauchsprofil: ");
+    for (const auto& val : consProfile) {
+        Serial.print(val, 1);
+        Serial.print(" ");
+    }
+    Serial.println();
+    Serial.print("Erzeugungsprofil: ");
+    for (const auto& val : genProfile) {
+        Serial.print(val, 1);
+        Serial.print(" ");
+    }
+    Serial.println();
+
+}

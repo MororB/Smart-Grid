@@ -10,6 +10,7 @@
 #include <Adafruit_SSD1306.h>
 #include <FastLED.h>
 #include "smart_grid_types.h"
+#include <vector>
 
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -58,6 +59,10 @@ public:
     ModuleMode getCurrentMode() const;
     void setCurrentMode(ModuleMode mode);
 
+    void setSystemTime(uint32_t);
+    uint32_t getSystemTime();
+    void updateSystemTime();
+
 private:
     ModuleType myModuleType;
     SmartGridData smartGridData;
@@ -75,6 +80,24 @@ private:
     bool newData = true;
     bool dataChanged = false; // Flag, ob sich die Daten geändert haben
     uint8_t own_mac[6];
+    unsigned long last_update = 0;
+    unsigned long systemTimeStartMs = 0; // Startzeitpunkt in ms
+
+
+    std::vector<float> consAnchors;    // Anker für Verbrauch
+    std::vector<float> genAnchors;     // Anker für Erzeugung
+
+    std::vector<float> consProfile;    // Interpoliertes Profil
+    std::vector<float> genProfile;    
+    uint16_t profileSize = 0; // Größe des Profils 
+
+    uint32_t cycleDurationMs    = 20000;  // 24 h in ms                       
+    uint32_t lastStepTimeMs = 0;
+    uint32_t lastStepMs      = 0;
+    uint8_t  cycleIndex = 0;
+    bool     cycleEnabled = true;
+    bool modeMakeStep = false; // Flag, ob der Modus einen Schritt machen soll
+
 
     void updateDisplay();
     void updateLED();
@@ -90,6 +113,13 @@ private:
     void runTagNachtzyklus();
     void runInteraktiv();
     void runPause();
+
+    void generateInterpolatedProfile(const std::vector<float>& anchors,
+                                 std::vector<float>& profile);
+    void setDailyProfiles(const std::vector<float>& consAnch,
+                      const std::vector<float>& genAnch,
+                      size_t outPoints,
+                      uint32_t durationMs);
 };
 
 #endif
