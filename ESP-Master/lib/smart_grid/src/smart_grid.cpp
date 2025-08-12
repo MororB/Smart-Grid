@@ -44,9 +44,8 @@ void SmartGrid::sendJoinMessage() {
     Serial.println("Sende Join-Message...");
     JoinMessageWithType msg;
     msg.type = MSG_JOIN;
-    msg.join.is_joining = true;
     WiFi.macAddress(msg.join.mac);
-    msg.join.module_type = myModuleType;
+    msg.join.data = getSmartGridData(); // Aktuelle SmartGrid-Daten anhängen
     esp_now_send(BROADCAST_MAC, (uint8_t*)&msg, sizeof(msg));
 }
 
@@ -73,15 +72,14 @@ void SmartGrid::handleReceivedModuleRegistry(const uint8_t* incomingData) {
     SingleModuleRegistryMessage msg;
     memcpy(&msg, incomingData, sizeof(msg));
     //const ModuleRegistry* receivedRegistry = (const ModuleRegistry*)incomingData;
-    for (int i = 0; i < msg.registry.count && i < MAX_MODULES; ++i) {
-        addPeerIfNew(msg.registry.modules.mac, msg.registry.modules.type);
-        computeNetworkStatus();
-    }
+    addPeerIfNew(msg.registry.modules.mac, msg.registry.modules.data);
+    computeNetworkStatus();
+    
 }
 
 void SmartGrid::handleJoinMessage(const JoinMessageWithType& joinMsg) {
     newPeerCount++; // Zähler erhöhen
-    addPeerIfNew(joinMsg.join.mac, static_cast<ModuleType>(joinMsg.type));
+    addPeerIfNew(joinMsg.join.mac, joinMsg.join.data);
 }
 
 void SmartGrid::handleControlCommand(const uint8_t* macAddress, ControlCommand command) {
@@ -162,7 +160,7 @@ void SmartGrid::handleRecivedSmartGridData(const uint8_t* mac, const uint8_t* in
 
 }
 
-void SmartGrid::sendJsonStatusToPi_(const SmartGridData& d) {
+void SmartGrid::sendJsonStatusToPi_(const SmartGridData& d, const uint8_t *mac) {
     StaticJsonDocument<256> doc;
     doc["cmd"] = "status_response";
 
@@ -172,6 +170,7 @@ void SmartGrid::sendJsonStatusToPi_(const SmartGridData& d) {
     // doc["mac"] = macBuf;
 
     JsonObject js = doc.createNestedObject("data");
+    js["mac"]       = mac;
     js["timestamp"]          = d.timestamp;
     js["id"]                 = d.id;
     js["module"]             = d.module;
@@ -210,7 +209,7 @@ void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingDat
             //handleRecivedSmartGridData(mac, incomingData, len);
             SmartGridDataMessage data;
             memcpy(&data, incomingData, sizeof(SmartGridDataMessage));
-            sendJsonStatusToPi_(data.data);
+            sendJsonStatusToPi_(data.data, mac);
             break;
         }
         case MSG_JOIN: {
@@ -242,7 +241,13 @@ void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingDat
             Serial.print("Anzahl empfangener RegistryRequests: ");
             Serial.println(receivedRegistryRequests);
 
-            addPeerIfNew(req.requesterMac, MODULE_CAR);
+            esp_now_peer_info_t peerInfo{};
+            memcpy(peerInfo.peer_addr, mac, 6);
+            peerInfo.channel = 0;
+            peerInfo.encrypt = false;
+            if (!esp_now_is_peer_exist(mac)) {
+                esp_now_add_peer(&peerInfo);
+            }
 
 
             uint8_t myMac[6];
@@ -281,9 +286,9 @@ void SmartGrid::printKnownPeers() const {
     Serial.println("Bekannte Module:");
     for (int i = 0; i < moduleRegistry.count; i++) {
         Serial.print("Modul ");
-        Serial.print(i + 1);
+        Serial.print(moduleRegistry.modules[i].data.id);
         Serial.print(" (Typ ");
-        Serial.print(moduleRegistry.modules[i].type);
+        Serial.print(moduleRegistry.modules[i].data.module);
         Serial.print("): ");
         for (int j = 0; j < 6; j++) {
             Serial.printf("%02X", moduleRegistry.modules[i].mac[j]);
@@ -293,7 +298,7 @@ void SmartGrid::printKnownPeers() const {
     }
 }
 
-bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, ModuleType type) {
+bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, SmartGridData data) {
     // 1) Schon drin?
     for (int i = 0; i < moduleRegistry.count; ++i) {
         if (memcmp(moduleRegistry.modules[i].mac, macAddress, 6) == 0) {
@@ -307,11 +312,15 @@ bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, ModuleType type) {
     }
 
     // 3) Neuen Eintrag anlegen
+    Serial.print("ADD TYPE:");
+    Serial.println(data.module);
+    uint8_t newId = moduleRegistry.count + 1;
     ModuleState& m = moduleRegistry.modules[moduleRegistry.count++];
     memcpy(m.mac, macAddress, 6);
-    m.type = type;
-    // Modul-Daten auf 0 setzen (falls du Default-Werte möchtest)
-    m.data = SmartGridData{ /* das leert alle Felder */ };
+    moduleRegistry.modules[moduleRegistry.count].data = data;
+    moduleRegistry.modules[moduleRegistry.count].data.id = newId; // ID setzen
+
+
 
     // 4) ESP-NOW Peer eintragen
     esp_now_peer_info_t peerInfo{};
@@ -329,7 +338,9 @@ bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, ModuleType type) {
         if (i < 5) Serial.print(':');
     }
     Serial.print("  Typ=");
-    Serial.println(type);
+    Serial.println(data.module);
+    Serial.print("  ID=");
+    Serial.println(newId);
 
     // 6) Erstes Peer → Registry senden
     if (newPeerCount == 1) {
@@ -366,7 +377,7 @@ const ModuleRegistry& SmartGrid::getModuleRegistry() const {
 bool SmartGrid::jsonToSmartGrid(const JsonDocument& json, SmartGridData* data) {
     data->timestamp = json["timestamp"].as<uint32_t>();
     data->id = json["id"].as<uint8_t>();
-    data->module = json["module"].as<uint8_t>();
+    data->module = static_cast<ModuleType>(json["module"].as<uint8_t>());
     data->error = json["error"].as<uint8_t>();
 
     data->current_consumption = json["current_consumption"] | 0.0f;
@@ -406,24 +417,50 @@ void SmartGrid::computeNetworkStatus() {
     // Berechne den Netzstatus für jedes Modul
     Serial.println("Berechne Netzstatus...");
     float maxAbs = 0;
+
+    int ownIndex = -1;
+    for (int j = 0; j < moduleRegistry.count && j < MAX_MODULES; ++j) {
+        if (memcmp(moduleRegistry.modules[j].mac, own_mac, 6) == 0) {
+            ownIndex = j;
+            break;
+        }
+    }
+    if (ownIndex == -1) {
+        Serial.println("Eigenes Modul nicht gefunden!");
+        return; // Eigenes Modul nicht gefunden, Abbruch
+    }
+
+    smartGridData.id = moduleRegistry.modules[ownIndex].data.id; // Setze ID des eigenen Moduls
+    //smartGridData.module = moduleRegistry.modules[ownIndex].type; // Setze Modultyp des eigenen Moduls
+
+
     for (int i = 0; i < moduleRegistry.count; ++i) {
         auto& s = moduleRegistry.modules[i];
         s.net = s.data.current_generation - s.data.current_consumption;
         maxAbs = max(maxAbs, fabs(s.net));
     }
-    for (int i = 0; i < moduleRegistry.count; ++i) {
-        auto& s = moduleRegistry.modules[i];
-        s.brightness =  (uint8_t)((fabs(s.net) / maxAbs) * 255);
-        Serial.print("Modul ");
-        Serial.print(i);
-        Serial.print(" - Netzstatus: ");
+
+    // Berechne nur für das eigene Modul die Werte für brightness und color
+    if (ownIndex != -1) {
+        auto& s = moduleRegistry.modules[ownIndex];
+        if (s.net == 0) {
+            brightness = 0;
+            motorPwm = 0; // Motor aus
+            //motorForward = true; // Vorwärts, wenn Netzstatus 0
+        } else {
+            brightness = (uint8_t)((fabs(s.net) / maxAbs) * 255);
+            motorPwm = (uint8_t)((fabs(s.net) / maxAbs) * 255);
+            //motorForward = (s.net >= 0); // Vorwärts, wenn net positiv
+        }
+
+        Serial.print("Eigenes Modul - Netzstatus: ");
         Serial.print(s.net);
         Serial.print("  Helligkeit: ");
-        Serial.print(s.brightness);
+        Serial.print(brightness);
         Serial.print("  Farbe: ");
 
-        s.color = (s.net >= 0) ? CRGB::Green : CRGB::Red;
-        if(s.net >= 0) {
+        color = (s.net >= 0) ? CRGB::Green : CRGB::Red;
+        if (s.net >= 0) {
             Serial.println("Grün");
         } else {
             Serial.println("Rot");
@@ -520,20 +557,17 @@ void SmartGrid::updateLED() {
             break;
         }
     }
-    Serial.print("Eigenes Modul gefunden bei Index: ");
-    Serial.println(ownIndex);
+    //Serial.print("Eigenes Modul gefunden bei Index: ");
+    //Serial.println(ownIndex);
     if (ownIndex == -1) return; // Eigenes Modul nicht gefunden
+
+    //Serial.print("FARBE SET:");
+    //Serial.print(color);
 
     // Setze alle LEDs entsprechend
     for (int i = 0; i < NUM_LEDS; i++) {
-        Serial.print("Setze LED ");
-        Serial.print(i);
-        Serial.print(" auf Farbe: ");
-        Serial.print(moduleRegistry.modules[ownIndex].color.r);
-        leds[i] = moduleRegistry.modules[ownIndex].color;
-        Serial.print(" mit Helligkeit: ");
-        Serial.println(moduleRegistry.modules[ownIndex].brightness);
-        leds[i].nscale8_video(moduleRegistry.modules[ownIndex].brightness);
+        leds[i] = color;
+        leds[i].nscale8_video(brightness);
     }
     FastLED.show();
 }
@@ -619,7 +653,7 @@ void SmartGrid::processUartCommand_(const String &line) {
         SmartGridData d;
         d.timestamp = doc["timestamp"].as<uint32_t>();
         d.id = doc["id"].as<uint8_t>();
-        d.module = doc["module"].as<uint8_t>();
+        d.module =  static_cast<ModuleType>(doc["module"].as<uint8_t>());
         d.current_consumption = doc["consumption"].as<float>();
         d.current_generation = doc["generation"].as<float>();
         d.current_storage = doc["storage"].as<float>();

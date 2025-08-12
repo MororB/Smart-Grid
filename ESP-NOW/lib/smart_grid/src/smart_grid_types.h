@@ -32,7 +32,7 @@ typedef struct {
 typedef struct {
     uint32_t timestamp;             // 4 Byte
     uint8_t id;                     // 1 Byte
-    uint8_t module;                 // 1 Byte
+    ModuleType module;                 // 1 Byte
     float current_consumption;     // 4 Byte
     float current_generation;      // 4 Byte
     float current_storage;         // 4 Byte
@@ -41,9 +41,8 @@ typedef struct {
 } SmartGridData;
 
 struct JoinMessage {
-    bool is_joining;
     uint8_t mac[6];
-    uint8_t module_type; 
+    SmartGridData data; // Enthält die SmartGrid-Daten des Moduls 
 };
 
 enum ControlCommandType {
@@ -64,7 +63,7 @@ enum ModuleMode : uint8_t {
     MODE_PAUSE
 };
 
-#define MAX_ANCHOR_POINTS 20 // Maximale Anzahl an Ankerpunkten für Profile
+#define MAX_ANCHOR_POINTS 25 // Maximale Anzahl an Ankerpunkten für Profile
 
 struct profileMessage {
     //ModuleMode mode; // statt uint8_t mode
@@ -96,13 +95,10 @@ struct ControlCommand {
 
 struct ModuleState {
     uint8_t       mac[6];               // Peer-MAC
-    ModuleType    type;                 // Peer-Typ
     SmartGridData data;                 // zuletzt empfangene Messwerte
 
         // Netz‑Status (wird von computeNetworkStatus() befüllt)
     float         net;        // data.generation - data.consumption
-    uint8_t       brightness; // 0…255
-    CRGB          color;      // Grün bei Überschuss, Rot bei Defizit
 };
 
 struct ModuleRegistry {

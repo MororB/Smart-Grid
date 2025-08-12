@@ -10,6 +10,7 @@
 #include <Adafruit_SSD1306.h>
 #include <FastLED.h>
 #include "smart_grid_types.h"
+#include <vector>
 
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -31,7 +32,7 @@ public:
     void onReceiveCallback(const uint8_t *mac, const uint8_t *incomingData, int len);
     void printKnownPeers() const;
     void printMacAddress() const;
-    bool addPeerIfNew(const uint8_t* macAddress, ModuleType type = MODULE_SOLAR);
+    bool addPeerIfNew(const uint8_t* macAddress, SmartGridData data);
     void sendModuleRegistryToPeer(const uint8_t* receiverMac);
     void handleReceivedModuleRegistry(const uint8_t* incomingData);
     void handleJoinMessage(const JoinMessageWithType& joinMsg);
@@ -78,6 +79,41 @@ private:
     bool newData = true;
     bool dataChanged = false; // Flag, ob sich die Daten geändert haben
     uint8_t own_mac[6];
+
+    unsigned long last_update = 0;
+    unsigned long systemTimeStartMs = 0; // Startzeitpunkt in ms
+
+
+    std::vector<uint16_t> consAnchors;    // Anker für Verbrauch
+    std::vector<uint16_t> genAnchors;     // Anker für Erzeugung
+
+    std::vector<uint16_t> consProfile;    // Interpoliertes Profil
+    std::vector<uint16_t> genProfile;    
+    uint16_t profileSize = 0; // Größe des Profils 
+
+    uint32_t cycleDurationMs    = 20000;  // 24 h in ms                       
+    uint32_t lastStepTimeMs = 0;
+    uint32_t lastStepMs      = 0;
+    uint8_t  cycleIndex = 0;
+    bool     cycleEnabled = true;
+    bool modeMakeStep = false; // Flag, ob der Modus einen Schritt machen soll
+
+    // HW354 braucht zwei Eingänge: IN1 und IN2
+    static constexpr int MOTOR_IN1_PIN     = 25;  
+    static constexpr int MOTOR_IN2_PIN     = 26;  
+
+    // PWM-Setup
+    static constexpr int MOTOR_PWM_FREQ    = 5000; // 5 kHz
+    static constexpr int MOTOR_PWM_RES     = 8;    // 8-Bit Auflösung
+    static constexpr int MOTOR_PWM_CH_A    = 0;    // Kanal 0 → IN1
+    static constexpr int MOTOR_PWM_CH_B    = 1;    // Kanal 1 → IN2
+
+    uint8_t       brightness; // 0…255
+    CRGB          color;      // Grün bei Überschuss, Rot bei Defizit
+    uint8_t motorPwm       = 0;    // 0…255
+    bool    motorForward   = true; // true=IN1 aktiviert, false=IN2
+
+
     String uartBuf_;
     bool masterRequest = false; // Flag, ob der Master den Status anfordert
 
@@ -88,7 +124,8 @@ private:
     void computeNetworkStatus();
     bool checkForChanges();
     void sendNewSmartGridData();
-    void sendJsonStatusToPi_(const SmartGridData& d);
+
+    void sendJsonStatusToPi_(const SmartGridData& d,const uint8_t *mac);
 
     void runAutomatik();
     void runTageszyklus();
