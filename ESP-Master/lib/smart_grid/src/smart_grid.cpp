@@ -40,6 +40,91 @@ void SmartGrid::printMacAddress() const {
     Serial.println("}");
 }
 
+// Hilfsfunktion: Index eines MAC-Eintrags finden, -1 wenn nicht vorhanden
+int SmartGrid::indexOfMac(const uint8_t mac[6]) {
+    for (int i = 0; i < moduleRegistry.count; ++i) {
+        if (memcmp(moduleRegistry.modules[i].mac, mac, 6) == 0) return i;
+    }
+    return -1;
+}
+
+void SmartGrid::print_single_registry(int reg_num) {
+    if (reg_num < 0 || reg_num >= moduleRegistry.count) {
+        Serial.println("print_single_registry: Index out of bounds");
+        return;
+    }
+    const ModuleState& m = moduleRegistry.modules[reg_num];
+
+    Serial.print("Registry["); Serial.print(reg_num); Serial.println("]");
+    Serial.print("  MAC: ");
+    for (int j = 0; j < 6; ++j) {
+        Serial.printf("%02X", m.mac[j]);
+        if (j < 5) Serial.print(":");
+    }
+    Serial.println();
+    Serial.print("  ID: ");     Serial.println(m.data.id);
+    Serial.print("  Module: "); Serial.println(m.data.module);
+    Serial.print("  Cons: ");   Serial.println(m.data.current_consumption, 1);
+    Serial.print("  Gen : ");   Serial.println(m.data.current_generation, 1);
+    Serial.print("  Stor: ");   Serial.println(m.data.current_storage, 1);
+    Serial.print("  Err : ");   Serial.println(m.data.error);
+}
+
+void SmartGrid::delet_single_registry(int reg_num){
+
+    uint8_t macToRemove[6];
+    memcpy(macToRemove, moduleRegistry.modules[reg_num].mac, 6);
+
+    if (esp_now_is_peer_exist(macToRemove)) {
+        esp_now_del_peer(macToRemove);
+    }
+
+    moduleRegistry.count = (moduleRegistry.count > 0) ? moduleRegistry.count - 1 : 0;
+    ModuleState tempModules;
+    tempModules.data.id = 0;;
+    moduleRegistry.modules[reg_num] = tempModules;
+}
+
+void SmartGrid::leave_network(){
+
+    sendLeaveNetworkMessage();
+
+    esp_now_deinit();
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+}
+
+void SmartGrid::sendLeaveNetworkMessage(){
+    Serial.println("Sende Leave-Network-Message...");
+    LeaveNetworkMessage msg;
+    msg.type = MSG_LEAVE_NETWORK;
+    memcpy(msg.mac, own_mac, sizeof(msg.mac));
+    esp_now_send(BROADCAST_MAC, (uint8_t*)&msg, sizeof(msg));
+    delay(500); // Kurze Verzögerung, um sicherzustellen, dass die Nachricht gesendet wird
+    Serial.println("Verlasse Netzwerk und deaktiviere ESP-NOW.");
+}
+
+void SmartGrid::handleLeaveNetworkMessage(const uint8_t* macAddress) {
+    Serial.print("Empfange Leave-Network-Message von MAC: ");
+    for (int j = 0; j < 6; ++j) {
+        Serial.printf("%02X", macAddress[j]);
+        if (j < 5) Serial.print(":");
+    }
+    Serial.println();
+
+    int idx = indexOfMac(macAddress);
+    if (idx >= 0) {
+        delet_single_registry(idx);
+#if DEBUG_FULL
+        Serial.println("Peer aus Registry entfernt.");
+#endif
+    } else {
+#if DEBUG_FULL
+        Serial.println("Peer nicht in Registry gefunden.");
+#endif
+    }
+}
+
 void SmartGrid::sendJoinMessage() {
     Serial.println("Sende Join-Message...");
     JoinMessageWithType msg;
@@ -66,6 +151,14 @@ void SmartGrid::sendControlCommand(const uint8_t* receiverMac, const ControlComm
     msg.command = command;
     esp_now_send(receiverMac, (uint8_t*)&msg, sizeof(msg));
 }
+
+void SmartGrid::sendControlCommandStep(const uint8_t* receiverMac, const ControlCommandStep& step) {
+    ControlCommandStepMessage msg;
+    msg.type = MSG_CONTROL_COMMAND_STEP;
+    msg.step = step;
+    esp_now_send(receiverMac, (uint8_t*)&msg, sizeof(msg));
+}
+
 
 void SmartGrid::handleReceivedModuleRegistry(const uint8_t* incomingData) {
     registryReceived = true;
@@ -170,7 +263,10 @@ void SmartGrid::sendJsonStatusToPi_(const SmartGridData& d, const uint8_t *mac) 
     // doc["mac"] = macBuf;
 
     JsonObject js = doc.createNestedObject("data");
-    js["mac"]       = mac;
+    char macStr[18];
+    snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    js["mac"] = macStr;
     js["timestamp"]          = d.timestamp;
     js["id"]                 = d.id;
     js["module"]             = d.module;
@@ -181,6 +277,25 @@ void SmartGrid::sendJsonStatusToPi_(const SmartGridData& d, const uint8_t *mac) 
     coords["x"]             = d.coordinates.x;
     coords["y"]             = d.coordinates.y;
     js["error"]             = d.error;
+
+    // Serielle Ausgabe für jedes JSON-Element
+    Serial.println("JSON status_response:");
+    Serial.print("cmd: "); Serial.println(doc["cmd"].as<const char*>());
+    Serial.print("mac: ");
+    for (int i = 0; i < 6; ++i) {
+        Serial.printf("%02X", mac[i]);
+        if (i < 5) Serial.print(":");
+    }
+    Serial.println();
+    Serial.print("timestamp: "); Serial.println(d.timestamp);
+    Serial.print("id: "); Serial.println(d.id);
+    Serial.print("module: "); Serial.println(d.module);
+    Serial.print("current_consumption: "); Serial.println(d.current_consumption);
+    Serial.print("current_generation: "); Serial.println(d.current_generation);
+    Serial.print("current_storage: "); Serial.println(d.current_storage);
+    Serial.print("coordinates.x: "); Serial.println(d.coordinates.x);
+    Serial.print("coordinates.y: "); Serial.println(d.coordinates.y);
+    Serial.print("error: "); Serial.println(d.error);
 
     String out;
     serializeJson(doc, out);
@@ -199,6 +314,8 @@ void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingDat
         Serial.println("Nachricht zu kurz!");
         return;
     }
+
+
 
     MessageType type = static_cast<MessageType>(incomingData[0]);
 
@@ -233,19 +350,41 @@ void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingDat
             break;
         }
         case MSG_REGISTRY_REQUEST: {
-            Serial.println("Empfange RegistryRequest...");
+            #if DEBUG_FULL
+                Serial.println("Empfange RegistryRequest...");
+            #endif
             RegistryRequestMessage req;
             memcpy(&req, incomingData, sizeof(req));
+            handleRegistryRequest(req);
+            break;
+        }
+        case MSG_LEAVE_NETWORK: {
+            #if DEBUG_FULL
+                Serial.println("Empfange Leave-Network-Message...");
+            #endif
+            handleLeaveNetworkMessage(mac);
+            printKnownPeers();
+            break;
+        }
+        default:
+            Serial.println("Unbekannter Nachrichtentyp!");
+            break;
+    }
+}
+
+void SmartGrid::handleRegistryRequest(RegistryRequestMessage req) {
             receivedRegistryRequests++; // Zähle mit
+            lastRegistryRequestTime = millis();
+            checkRegistry = true; // Setze Flag, dass Registry geprüft werden soll
 
             Serial.print("Anzahl empfangener RegistryRequests: ");
             Serial.println(receivedRegistryRequests);
 
             esp_now_peer_info_t peerInfo{};
-            memcpy(peerInfo.peer_addr, mac, 6);
+            memcpy(peerInfo.peer_addr, req.requesterMac, 6);
             peerInfo.channel = 0;
             peerInfo.encrypt = false;
-            if (!esp_now_is_peer_exist(mac)) {
+            if (!esp_now_is_peer_exist(req.requesterMac)) {
                 esp_now_add_peer(&peerInfo);
             }
 
@@ -266,20 +405,21 @@ void SmartGrid::onReceiveCallback(const uint8_t *mac, const uint8_t *incomingDat
                 if (i < 5) Serial.print(":");
             }
             Serial.println();
+            Serial.print("Eigene Registry-Nummer: ");
+            Serial.println(own_registry_number);
+            Serial.print("Anzahl Module in Registry: ");
+            Serial.println(moduleRegistry.count);
+            Serial.print("Anzahl empfangener RegistryRequests: ");
+            Serial.println(receivedRegistryRequests);
 
-            if(newPeerCount - receivedRegistryRequests == 0){
+            if((own_registry_number - (moduleRegistry.count - receivedRegistryRequests - 1)) == 0){
                 sendModuleRegistryToPeer(req.requesterMac);
+                receivedRegistryRequests = 0; // Zähler zurücksetzen
                 Serial.println("Sende Registry an anfragendes Modul");
             }
             else {
                 Serial.println("Keine Registry gesendet, da ich nicht an der der Reihe bin");
             }
-            break;
-        }
-        default:
-            Serial.println("Unbekannter Nachrichtentyp!");
-            break;
-    }
 }
 
 void SmartGrid::printKnownPeers() const {
@@ -298,41 +438,131 @@ void SmartGrid::printKnownPeers() const {
     }
 }
 
+uint8_t SmartGrid::nextFreeId(){
+    bool used[MAX_MODULES + 1] = {false}; // Index 0 ungenutzt
+    for (int i = 0; i < moduleRegistry.count; ++i) {
+        uint8_t id = moduleRegistry.modules[i].data.id;
+        if (id >= 1 && id <= MAX_MODULES) used[id] = true;
+    }
+    for (uint8_t id = 1; id <= MAX_MODULES; ++id) {
+        if (!used[id]) return id;
+    }
+    return 0; // 0 = keine frei
+}
+
 bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, SmartGridData data) {
+#if DEBUG_FULL
+    Serial.println("==== addPeerIfNew START ====");
+    Serial.print("Prüfe, ob Modul schon bekannt ist: ");
+    for (int i = 0; i < 6; ++i) {
+        Serial.printf("%02X", macAddress[i]);
+        if (i < 5) Serial.print(":");
+    }
+    Serial.println();
+#endif
+
     // 1) Schon drin?
     for (int i = 0; i < moduleRegistry.count; ++i) {
+#if DEBUG_FULL
+        Serial.print("Vergleiche mit Registry-Eintrag ");
+        Serial.print(i);
+        Serial.print(": ");
+        for (int j = 0; j < 6; ++j) {
+            Serial.printf("%02X", moduleRegistry.modules[i].mac[j]);
+            if (j < 5) Serial.print(":");
+        }
+        Serial.println();
+#endif
         if (memcmp(moduleRegistry.modules[i].mac, macAddress, 6) == 0) {
+#if DEBUG_FULL
+            Serial.println("-> Modul existiert bereits, aktualisiere Daten.");
+            Serial.print("Aktualisierte Daten: ID=");
+            Serial.print(data.id);
+            Serial.print(", Typ=");
+            Serial.println(data.module);
+            Serial.println("==== addPeerIfNew ENDE ====");
+#endif
+            uint8_t keepId = moduleRegistry.modules[i].data.id;  // ID sichern
+            moduleRegistry.modules[i].data = data;
+            moduleRegistry.modules[i].data.id = keepId; 
             return false;
         }
     }
+
     // 2) Platz prüfen
+#if DEBUG_FULL
+    Serial.print("Registry Count: ");
+    Serial.println(moduleRegistry.count);
+#endif
     if (moduleRegistry.count >= MAX_MODULES) {
+#if DEBUG_FULL
         Serial.println("Maximale Peer-Anzahl erreicht!");
+        Serial.println("==== addPeerIfNew ENDE ====");
+#endif
         return false;
     }
 
     // 3) Neuen Eintrag anlegen
-    Serial.print("ADD TYPE:");
+#if DEBUG_FULL
+    Serial.println("Modul ist NEU, lege Eintrag an.");
+    Serial.print("ADD TYPE: ");
     Serial.println(data.module);
-    uint8_t newId = moduleRegistry.count + 1;
-    ModuleState& m = moduleRegistry.modules[moduleRegistry.count++];
-    memcpy(m.mac, macAddress, 6);
+#endif
+
+    uint8_t newId = nextFreeId();
+#if DEBUG_FULL
+    Serial.print("Vergebe neue ID: ");
+    Serial.println(newId);
+#endif
+
+    memcpy(moduleRegistry.modules[moduleRegistry.count].mac, macAddress, 6);
     moduleRegistry.modules[moduleRegistry.count].data = data;
-    moduleRegistry.modules[moduleRegistry.count].data.id = newId; // ID setzen
+    moduleRegistry.modules[moduleRegistry.count].data.id = newId; // Setze die ID für das neue Modul
 
+#if DEBUG_FULL
+    Serial.print("Eintrag im Registry-Array Index ");
+    Serial.println(moduleRegistry.count);
+    Serial.print("MAC: ");
+    for (int i = 0; i < 6; ++i) {
+        Serial.printf("%02X", macAddress[i]);
+        if (i < 5) Serial.print(":");
+    }
+    Serial.println();
+    Serial.print("Typ: ");
+    Serial.println(data.module);
+    Serial.print("ID: ");
+    Serial.println(newId);
+#endif
 
+    moduleRegistry.count++; // Hochzählen nach erfolgreichem Eintrag
+
+#if DEBUG_FULL
+    Serial.print("Registry Count nach Hinzufügen: ");
+    Serial.println(moduleRegistry.count);
+#endif
 
     // 4) ESP-NOW Peer eintragen
+#if DEBUG_FULL
+    Serial.println("Prüfe, ob ESP-NOW Peer existiert...");
+#endif
     esp_now_peer_info_t peerInfo{};
     memcpy(peerInfo.peer_addr, macAddress, 6);
     peerInfo.channel = 0;
     peerInfo.encrypt = false;
     if (!esp_now_is_peer_exist(macAddress)) {
+#if DEBUG_FULL
+        Serial.println("Peer existiert NICHT, füge hinzu.");
+#endif
         esp_now_add_peer(&peerInfo);
+    } else {
+#if DEBUG_FULL
+        Serial.println("Peer existiert bereits.");
+#endif
     }
 
     // 5) Debug-Output
-    Serial.print("Neues Modul: ");
+#if DEBUG_FULL
+    Serial.print("Neues Modul hinzugefügt: ");
     for (int i = 0; i < 6; ++i) {
         Serial.printf("%02X", macAddress[i]);
         if (i < 5) Serial.print(':');
@@ -341,15 +571,11 @@ bool SmartGrid::addPeerIfNew(const uint8_t* macAddress, SmartGridData data) {
     Serial.println(data.module);
     Serial.print("  ID=");
     Serial.println(newId);
-
-    // 6) Erstes Peer → Registry senden
-    if (newPeerCount == 1) {
-        sendModuleRegistryToPeer(macAddress);
-    }
+    Serial.println("==== addPeerIfNew ENDE ====");
+#endif
 
     return true;
 }
-
 
 SmartGridData SmartGrid::getSmartGridData() const {
     return smartGridData;
@@ -496,6 +722,24 @@ void SmartGrid::sendNewSmartGridData() {
     }
 }
 
+void SmartGrid::updateSystemTime() {
+    // Berechne vergangene Sekunden seit Startzeitpunkt, robust gegen Überlauf
+    unsigned long now = millis();
+    uint32_t elapsed = (now - systemTimeStartMs) / 1000;
+    setSystemTime(elapsed);
+}
+
+void SmartGrid::setSystemTime(uint32_t time){
+
+    smartGridData.timestamp = time;
+}
+
+
+uint32_t SmartGrid::getSystemTime(){
+
+    return smartGridData.timestamp;
+}
+
 
 
 void SmartGrid::updateDisplay() {
@@ -631,6 +875,14 @@ void SmartGrid::processUartCommand_(const String &line) {
     const char* macStr = doc["mac"];
         for (int i = 0; i < 6; ++i)
             mac[i] = strtoul(macStr + 3*i, nullptr, 16);
+    
+    esp_now_peer_info_t peerInfo{};
+    memcpy(peerInfo.peer_addr, mac, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+    if (!esp_now_is_peer_exist(mac)) {
+        esp_now_add_peer(&peerInfo);
+    }
 
     if (strcmp(cmd, "set_mode") == 0) {
         // { "cmd":"set_mode", "mac":"AA:BB:CC:DD:EE:FF", "mode":5 }
@@ -657,8 +909,8 @@ void SmartGrid::processUartCommand_(const String &line) {
         d.current_consumption = doc["consumption"].as<float>();
         d.current_generation = doc["generation"].as<float>();
         d.current_storage = doc["storage"].as<float>();
-        d.coordinates.x = doc["x"].as<uint8_t>();
-        d.coordinates.y = doc["y"].as<uint8_t>();
+        d.coordinates.x = doc["x"].as<int8_t>();
+        d.coordinates.y = doc["y"].as<int8_t>();
         d.error = doc["error"].as<uint8_t>();
             //setSmartGridData(d);
             Serial.println("Setze SmartGridData...");
@@ -692,14 +944,30 @@ void SmartGrid::processUartCommand_(const String &line) {
         sendControlCommand(BROADCAST_MAC, cc);
 
     }
+    else if(strcmp(cmd,"start_cycle") == 0){
+
+        if (cycleEnabled == false) {
+            Serial.println("Starte Zyklus...");
+            cycleEnabled = true;
+            Serial2.println(R"({"cmd":"ack","on":"start_cycle"})");
+        } else {
+            cycleEnabled = false; // Zyklus beenden
+            Serial2.println(R"({"cmd":"error","why":"cycle_already_started"})");
+        }
+
+    }
     else if(strcmp(cmd,"modify_mode") == 0){
         // { "cmd":"modify_mode", "mode":5 }
         cc.type = ControlCommandType::MODIFY_MODE;
         const char* macStr = doc["mac"];
         //cc.mode = 
+        cc.profile.consOrGen = doc["type"].as<uint8_t>();
         cc.profile.nAnchorPoints = doc["n_anchor_points"].as<uint8_t>();
         cc.profile.cycleDuration = doc["cycle_duration"].as<uint16_t>();
+        cycleDurationMs = cc.profile.cycleDuration * 1000; // in Millisekunden
         cc.profile.interpolationpoints = doc["interpolation_points"].as<uint8_t>();
+        time_per_step = cycleDurationMs / cc.profile.interpolationpoints; // Zeit pro Schritt in Millisekunden
+        profileSize = cc.profile.interpolationpoints;
         JsonArray arr = doc["anchor_points"].as<JsonArray>();
         size_t count = MAX_ANCHOR_POINTS;
         for (size_t i = 0; i < count; ++i) {
@@ -710,6 +978,42 @@ void SmartGrid::processUartCommand_(const String &line) {
         sendControlCommand(mac, cc);
         Serial2.println(R"({"cmd":"ack","on":"modify_mode"})");
     }
+    else if(strcmp(cmd,"leave_network") == 0){
+        // { "cmd":"leave_network", "mac":"AA:BB:CC:DD:EE:FF" }
+        cc.type = ControlCommandType::LEAVE_NETWORK;
+        sendControlCommand(mac, cc);
+        Serial2.println(R"({"cmd":"ack","on":"leave_network"})");
+    }
+    else if(strcmp(cmd,"leave_network_all") == 0){
+        // { "cmd":"leave_network_all"}
+        cc.type = ControlCommandType::LEAVE_NETWORK;
+        sendControlCommand(BROADCAST_MAC, cc);
+        Serial2.println(R"({"cmd":"ack","on":"leave_network_all"})");
+    }
+    else if(strcmp(cmd,"shutdown_single") == 0){
+        // { "cmd":"shutdown_single", "mac":"AA:BB:CC:DD:EE:FF" }
+        cc.type = ControlCommandType::SHUTDOWN_SINGLE_MODULE;
+        sendControlCommand(mac, cc);
+        Serial2.println(R"({"cmd":"ack","on":"shutdown_single"})");
+    }
+        else if(strcmp(cmd,"start_single") == 0){
+        // { "cmd":"shutdown_single", "mac":"AA:BB:CC:DD:EE:FF" }
+        cc.type = ControlCommandType::START_SINGLE_MODULE;
+        sendControlCommand(mac, cc);
+        Serial2.println(R"({"cmd":"ack","on":"start_single"})");
+    }
+        else if(strcmp(cmd,"shutdown_all") == 0){
+        // { "cmd":"shutdown_all"}
+        cc.type = ControlCommandType::SHUTDOWN_ALL_MODULES;
+        sendControlCommand(BROADCAST_MAC, cc);
+        Serial2.println(R"({"cmd":"ack","on":"shutdown_all"})");
+    }
+        else if(strcmp(cmd,"start_all") == 0){
+        // { "cmd":"shutdown_all"}
+        cc.type = ControlCommandType::START_ALL_MODULES;
+        sendControlCommand(BROADCAST_MAC, cc);
+        Serial2.println(R"({"cmd":"ack","on":"start_all"})");
+    }
     else {
         Serial2.println(R"({"cmd":"error","why":"unknown_cmd"})");
     }
@@ -717,6 +1021,8 @@ void SmartGrid::processUartCommand_(const String &line) {
 
 
 void SmartGrid::updateMaster() {
+
+    updateSystemTime();
 
 // 2) UART2 auf eingehende JSON‑Zeilen prüfen
     while (Serial2.available()) {
@@ -730,6 +1036,26 @@ void SmartGrid::updateMaster() {
         }
     }
 
+    if (cycleEnabled){
+        
+        uint32_t now = millis();
+        if ((now - lastStepMs) > time_per_step) {
+
+            ControlCommandStep cc{};
+
+            cc.type = ControlCommandType::MODE_NEXT_STEP;
+            cc.cycleIndex = cycleIndex;
+            sendControlCommandStep(BROADCAST_MAC, cc);
+
+            // Index und Zeit updaten
+            cycleIndex = (cycleIndex + 1) % profileSize;
+            //Serial.print("Aktueller Zyklusindex: ");
+            //Serial.println(cycleIndex);
+            lastStepMs = now; // Aktuelle Zeit als letzte Schrittzeit speichern
+    }
+
+
+    }
 
 
 }
@@ -1023,20 +1349,11 @@ void SmartGrid::tryRequestRegistry() {
     if (registryReceived) return; // Schon erhalten, nichts tun
 
     unsigned long now = millis();
-    const uint8_t MAX_ATTEMPTS = 3;
-    const unsigned long INTERVAL = 2000; // alle 2 Sekunden
+    sendRegistryRequest();
+    registryRequestAttempts++;
+    lastRegistryRequestTime = now;
+    Serial.println("RegistryRequest gesendet.");
 
-    if (registryRequestAttempts < MAX_ATTEMPTS && now - lastRegistryRequestTime > INTERVAL) {
-        sendRegistryRequest();
-        registryRequestAttempts++;
-        lastRegistryRequestTime = now;
-        Serial.println("RegistryRequest gesendet.");
-    }
-
-    if (!registryReceived && registryRequestAttempts >= MAX_ATTEMPTS) {
-        Serial.println("Ich bin das erste Modul im Netzwerk.");
-        // Hier ggf. spezielle Initialisierung
-    }
 }
 
 void SmartGrid::begin() {
@@ -1044,8 +1361,10 @@ void SmartGrid::begin() {
     registryReceived = false;
     registryRequestAttempts = 0;
     receivedRegistryRequests = 0;
-    newPeerCount = 0;
     lastRegistryRequestTime = millis();
+    last_update = millis();
+    systemTimeStartMs = last_update;
+
 
     WiFi.macAddress(own_mac);
     Serial.print("Eigene MAC-Adresse: ");
@@ -1057,6 +1376,24 @@ void SmartGrid::begin() {
     if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
     Serial.println(F("SSD1306 allocation failed"));
     }
+
+    Serial.println("module_type: " + String(myModuleType));
+
+    SmartGridData initialData;
+    initialData.timestamp = 0;
+    initialData.id = 0; // ID des Moduls
+    initialData.module = myModuleType; // Setze Modultyp
+    initialData.error = 0; // Kein Fehler
+    initialData.current_consumption = 0.0f; // Aktueller Verbrauch
+    initialData.current_generation = 0.0f; // Aktuelle Erzeugung
+    initialData.current_storage = 0.0f; // Aktueller Speicherstand
+    initialData.coordinates.x = 0; // X-Koordinate
+    initialData.coordinates.y = 0; // Y-Koordinate
+    setSmartGridData(initialData); // Setze initiale SmartGridData
+
+    moduleRegistry.count  = 0;
+    memset(moduleRegistry.modules, 0, sizeof(moduleRegistry.modules));
+    own_registry_number   = 255;  // „unbekannt“
     
     display.clearDisplay();
 
@@ -1072,15 +1409,32 @@ void SmartGrid::begin() {
 }
 
 void SmartGrid::runWaitForRegistry() {
-    tryRequestRegistry();
-    if (registryReceived) {
-        Serial.println("Registry erfolgreich empfangen!");
-        setCurrentMode(MODE_AUTOMATIK); // oder dein gewünschter Startmodus
-    } else if (registryRequestAttempts >= 3) {
-        Serial.println("Keine Registry erhalten. Ich bin das erste Modul im Netzwerk.");
-        setCurrentMode(MODE_AUTOMATIK); // oder dein gewünschter Startmodus
+
+    unsigned long now = millis();
+    // Prüfe, ob Registry bereits empfangen wurde
+    if(registryRequestAttempts < MAX_ATTEMPTS && now - lastRegistryRequestTime > INTERVAL_BETWEEN_REQUESTS) {
+        // Sende RegistryRequest, wenn noch nicht zu oft versucht
+        Serial.println("Sende RegistryRequest...");
+        tryRequestRegistry();
+    } else if (registryReceived) {
+        Serial.println("Registry bereits empfangen.");
+        setCurrentMode(MODE_AUTOMATIK);
+    } else if (registryRequestAttempts >= MAX_ATTEMPTS) {
+        Serial.println("Keine Registry erhalten → ich bin erstes Modul.");
+        SmartGridData me = getSmartGridData();
+        addPeerIfNew(own_mac, me);      // ← vergibt ID=1 (kleinste frei)
+        // own_registry_number setzen
+        for (int i=0;i<moduleRegistry.count;++i){
+            if (!memcmp(moduleRegistry.modules[i].mac, own_mac, 6)) {
+                own_registry_number = i;
+                break;
+            }
+        }
+        setCurrentMode(MODE_AUTOMATIK);
+
     }
 }
+
 
 
 

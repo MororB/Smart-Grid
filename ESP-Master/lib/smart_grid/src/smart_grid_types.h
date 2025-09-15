@@ -25,8 +25,8 @@ enum ModuleType : uint8_t {
 
 
 typedef struct {
-    uint8_t x;                  // 1 Byte
-    uint8_t y;                  // 1 Byte
+    int8_t x;                  // 1 Byte
+    int8_t y;                  // 1 Byte
 } Coordinat;
 
 typedef struct {
@@ -50,7 +50,12 @@ enum ControlCommandType {
     REQUEST_STATUS,
     SET_STATUS,
     MODE_NEXT_STEP,
-    MODIFY_MODE
+    MODIFY_MODE,
+    LEAVE_NETWORK,
+    SHUTDOWN_SINGLE_MODULE,
+    START_SINGLE_MODULE,
+    SHUTDOWN_ALL_MODULES,
+    START_ALL_MODULES,
 };
 
 enum ModuleMode : uint8_t {
@@ -80,18 +85,14 @@ struct ControlCommand {
     ModuleMode mode; // statt uint8_t mode
     SmartGridData statusOverride;
     profileMessage profile; // Profilinformationen
-
 };
 
-// struct ModuleInfo {
-//     uint8_t mac[6];
-//     ModuleType type;
-// };
+struct ControlCommandStep {
+    uint8_t targetMac[6];
+    ControlCommandType type; // MODE_NEXT_STEP
+    uint8_t cycleIndex;
+};
 
-// struct ModuleRegistry {
-//     ModuleInfo modules[MAX_MODULES];
-//     uint8_t count;
-// };
 
 struct ModuleState {
     uint8_t       mac[6];               // Peer-MAC
@@ -117,7 +118,9 @@ enum MessageType : uint8_t {
     MSG_MODULE_REGISTRY = 3,
     MSG_CONTROL_COMMAND = 4,
     MSG_REGISTRY_REQUEST = 5,
-    MSG_SINGLE_MODULE_REGISTRY = 6
+    MSG_SINGLE_MODULE_REGISTRY = 6,
+    MSG_CONTROL_COMMAND_STEP = 7,
+    MSG_LEAVE_NETWORK = 8
 };
 
 
@@ -136,6 +139,11 @@ struct JoinMessageWithType {
     JoinMessage join;
 };
 
+struct LeaveNetworkMessage {
+    MessageType type = MSG_LEAVE_NETWORK;
+    uint8_t mac[6];
+};
+
 struct ModuleRegistryMessage {
     MessageType type = MSG_MODULE_REGISTRY;
     ModuleRegistry registry;
@@ -144,6 +152,11 @@ struct ModuleRegistryMessage {
 struct ControlCommandMessage {
     MessageType type = MSG_CONTROL_COMMAND;
     ControlCommand command;
+};
+
+struct ControlCommandStepMessage {
+    MessageType       type = MSG_CONTROL_COMMAND_STEP;   // == MessageType::MSG_CONTROL_COMMAND_STEP
+    ControlCommandStep step;
 };
 
 struct RegistryRequestMessage {

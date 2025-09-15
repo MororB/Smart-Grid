@@ -18,6 +18,8 @@ void setup() {
     delay(1000); // Kurze Pause für die serielle Verbindung
     Serial.println("module_type: " + String(myModuleType));
 
+    pinMode(SOLAR_PIN, INPUT);
+
     if (!smartGrid.initEspNow(true)) {
         Serial.println("ESP-NOW Init fehlgeschlagen, stoppe...");
         while (true) delay(1000);
