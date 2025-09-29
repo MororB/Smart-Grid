@@ -88,11 +88,13 @@ Ein Raspberry Pi mit Node-RED dient (optional) als zentrale Visualisierung/Bedie
 - Deckel: einheitlich, LEDs montiert, Magnete unten, zentrale Durchführung (Kabel), optionale Diffusoren für gleichmäßiges Licht.  
 - Modell-Module: magnetisch aufsetzbar, elektrische Verbindung via JST; CAD in Fusion 360/Blender.  
 
-**STL-Dateien** (werden ergänzt):  
-- `stl/grundkoerper/` – Grundkörper, Deckel, Diffusoren  
-- `stl/module/haus/` – Haus-Aufsatz  
-- `stl/module/fabrik/` – Fabrik  
-- `stl/module/pv/`, `stl/module/wind/`, `stl/module/speicher/`  
+**STL-Dateien – Grundkörper**:  
+- [Basiskörper](./STL-Files/Smartgrid%20Grundkörper/Basiskörper_V40.stl)  
+- [Batterie Deckel](./STL-Files/Smartgrid%20Grundkörper/Batterie__Deckel.stl)  
+- [Einpress Plättchen](./STL-Files/Smartgrid%20Grundkörper/EinpressPlättchen.stl)  
+- [LED-Cover](./STL-Files/Smartgrid%20Grundkörper/LED-Cover%20v11.stl)  
+- [LED-Deckel Unten](./STL-Files/Smartgrid%20Grundkörper/LED-Deckel_V15.stl)
+- [LED-Deckel Oben](./STL-Files/Smartgrid%20Grundkörper/Deckel-LED-Oben_V15.stl)   
 
 ---
 
