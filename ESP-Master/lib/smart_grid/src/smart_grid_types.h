@@ -25,14 +25,14 @@ enum ModuleType : uint8_t {
 
 
 typedef struct {
-    uint8_t x;                  // 1 Byte
-    uint8_t y;                  // 1 Byte
+    int8_t x;                  // 1 Byte
+    int8_t y;                  // 1 Byte
 } Coordinat;
 
 typedef struct {
     uint32_t timestamp;             // 4 Byte
     uint8_t id;                     // 1 Byte
-    uint8_t module;                 // 1 Byte
+    ModuleType module;                 // 1 Byte
     float current_consumption;     // 4 Byte
     float current_generation;      // 4 Byte
     float current_storage;         // 4 Byte
@@ -41,40 +41,134 @@ typedef struct {
 } SmartGridData;
 
 struct JoinMessage {
-    bool is_joining;
     uint8_t mac[6];
-    uint8_t module_type; 
+    SmartGridData data; // Enthält die SmartGrid-Daten des Moduls 
 };
 
 enum ControlCommandType {
     SET_MODE,
     REQUEST_STATUS,
-    SET_STATUS
+    SET_STATUS,
+    MODE_NEXT_STEP,
+    MODIFY_MODE,
+    LEAVE_NETWORK,
+    SHUTDOWN_SINGLE_MODULE,
+    START_SINGLE_MODULE,
+    SHUTDOWN_ALL_MODULES,
+    START_ALL_MODULES,
+};
+
+enum ModuleMode : uint8_t {
+    MODE_WAIT_FOR_REGISTRY,
+    MODE_AUTOMATIK,
+    MODE_TAGESZYKLUS,
+    MODE_NACHTZYKLUS,
+    MODE_TAGNACHTZYKLUS,
+    MODE_INTERAKTIV,
+    MODE_PAUSE
+};
+
+#define MAX_ANCHOR_POINTS 25 // Maximale Anzahl an Ankerpunkten für Profile
+
+struct profileMessage {
+    //ModuleMode mode; // statt uint8_t mode
+    bool consOrGen; // true = Verbrauch, false = Erzeugung
+    uint8_t nAnchorPoints; // Anzahl der Ankerpunkte
+    uint16_t anchorPoints[MAX_ANCHOR_POINTS]; // Ankerpunkte (max. 10)
+    uint8_t interpolationpoints; // Anzahl der Interpolationspunkte
+    uint16_t cycleDuration; // Zyklusdauer in Sekunden
 };
 
 struct ControlCommand {
     uint8_t targetMac[6];
     ControlCommandType type;
-    uint8_t mode; // z. B. bei SET_MODE
-    SmartGridData statusOverride; // bei SET_STATUS
+    ModuleMode mode; // statt uint8_t mode
+    SmartGridData statusOverride;
+    profileMessage profile; // Profilinformationen
 };
 
-struct ModuleInfo {
-    uint8_t mac[6];
-    ModuleType type;
+struct ControlCommandStep {
+    uint8_t targetMac[6];
+    ControlCommandType type; // MODE_NEXT_STEP
+    uint8_t cycleIndex;
+};
+
+
+struct ModuleState {
+    uint8_t       mac[6];               // Peer-MAC
+    SmartGridData data;                 // zuletzt empfangene Messwerte
+
+        // Netz‑Status (wird von computeNetworkStatus() befüllt)
+    float         net;        // data.generation - data.consumption
 };
 
 struct ModuleRegistry {
-    ModuleInfo modules[MAX_MODULES];
-    uint8_t count;
+    ModuleState modules[MAX_MODULES];
+    uint8_t     count;
 };
 
+struct SingleModuleRegistry {
+    ModuleState modules;
+    uint8_t     count;
+};
 
+enum MessageType : uint8_t {
+    MSG_SMARTGRID_DATA = 1,
+    MSG_JOIN = 2,
+    MSG_MODULE_REGISTRY = 3,
+    MSG_CONTROL_COMMAND = 4,
+    MSG_REGISTRY_REQUEST = 5,
+    MSG_SINGLE_MODULE_REGISTRY = 6,
+    MSG_CONTROL_COMMAND_STEP = 7,
+    MSG_LEAVE_NETWORK = 8
+};
 
 
 static const uint8_t BROADCAST_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 //static ModuleRegistry moduleRegistry = { {}, 0 };
 extern ModuleRegistry moduleRegistry;
 extern SmartGridData smartGridData;
+
+struct SmartGridDataMessage {
+    MessageType type = MSG_SMARTGRID_DATA;
+    SmartGridData data;
+};
+
+struct JoinMessageWithType {
+    MessageType type = MSG_JOIN;
+    JoinMessage join;
+};
+
+struct LeaveNetworkMessage {
+    MessageType type = MSG_LEAVE_NETWORK;
+    uint8_t mac[6];
+};
+
+struct ModuleRegistryMessage {
+    MessageType type = MSG_MODULE_REGISTRY;
+    ModuleRegistry registry;
+};
+
+struct ControlCommandMessage {
+    MessageType type = MSG_CONTROL_COMMAND;
+    ControlCommand command;
+};
+
+struct ControlCommandStepMessage {
+    MessageType       type = MSG_CONTROL_COMMAND_STEP;   // == MessageType::MSG_CONTROL_COMMAND_STEP
+    ControlCommandStep step;
+};
+
+struct RegistryRequestMessage {
+    MessageType type = MSG_REGISTRY_REQUEST;
+    uint8_t requesterMac[6];
+};
+
+struct SingleModuleRegistryMessage {
+    MessageType type = MSG_SINGLE_MODULE_REGISTRY;
+    SingleModuleRegistry registry;
+};
+
+
 
 #endif
