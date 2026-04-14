@@ -12,12 +12,13 @@
 #include "smart_grid_types.h"
 #include <vector>
 
+static constexpr uint16_t JOIN_JITTER_MAX_MS = 250;
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 #define NUM_LEDS 22
-#define DATA_PIN 27
+#define DATA_PIN 19
 
 #define MAX_ATTEMPTS 3
 #define INTERVAL_BETWEEN_REQUESTS 2000 // alle 2 Sekunden
@@ -177,7 +178,11 @@ private:
     void pulseHigh(unsigned long ms);
     void smokeTurnOn(); 
     void smokeTurnOff();
+    unsigned long lastStepMs_led = 0;
+    int led_step = 0;            // aktuelle Spinner-Position (0..lit-1)
+    const uint16_t STEP_PERIOD_MS = 200;
     void renderStorageBarForOwnModule();
+    void autoBalanceSubstationIdeal();
 
     void generateInterpolatedProfile(const std::vector<uint16_t>& anchors,
                                  std::vector<uint16_t>& profile);
