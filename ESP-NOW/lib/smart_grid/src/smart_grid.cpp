@@ -195,7 +195,7 @@ void SmartGrid::sendModuleRegistryToPeer(const uint8_t* receiverMac) {
         msg.registry.modules = moduleRegistry.modules[i];
         msg.registry.count = moduleRegistry.count;
         esp_now_send(receiverMac, (uint8_t*)&msg, sizeof(msg));
-        delay(300);
+        delay(50);
     }
 }
 
@@ -883,33 +883,50 @@ void SmartGrid::computeNetworkStatus() {
 
 bool SmartGrid::checkForChanges() {
     bool changed = false;
+    static unsigned long jitterDueAt = 0;
 
     if (newData) {
-        // Aktualisiere Netzstatus und LED-Anzeige
-        // computeNetworkStatus();
-        // updateDisplay();
-        // updateLED();
         computeNetworkStatus();
-        newData = false; // Nach der Aktualisierung zurücksetzen
+        updateDisplay();
+        updateLED();
+        newData = false;
         changed = true;
     }
 
+    // Fester, deterministischer Jitter basierend auf Modul-ID
+    const uint16_t JITTER_STEP_MS = 50; // z. B. 50 ms pro ID
+
     if (dataChanged) {
-        sendNewSmartGridData();
-        computeNetworkStatus();
-        dataChanged = false; // Nach dem Senden zurücksetzen
-        changed = true; // Daten haben sich geändert
+        if (jitterDueAt == 0) {
+            uint8_t id = smartGridData.id; // 1..MAX_MODULES
+            jitterDueAt = millis() + (id * JITTER_STEP_MS);
+            Serial.printf("Geplanter Jitter: Modul-ID=%u, Delay=%u ms\n", 
+                          id, id * JITTER_STEP_MS);
+        }
+        dataChanged = false;
     }
 
-    return changed; // Am Ende wird entschieden, ob sich etwas geändert hat
+    if (jitterDueAt != 0 && (int32_t)(millis() - jitterDueAt) >= 0) {
+        sendNewSmartGridData();
+        computeNetworkStatus();
+        updateDisplay();
+        updateLED();
+        jitterDueAt = 0;
+        changed = true;
+    }
+
+    return changed;
 }
+
 
 void SmartGrid::sendNewSmartGridData() {
     // Sende SmartGridData an alle bekannten Peers
-    for (int i = 0; i < moduleRegistry.count; ++i) {
-        sendSmartGridData(moduleRegistry.modules[i].mac);
-        delay(10);
-    }
+    // for (int i = 0; i < moduleRegistry.count; ++i) {
+    //     sendSmartGridData(moduleRegistry.modules[i].mac);
+    //     delay(10);
+    // }
+    sendSmartGridData(BROADCAST_MAC); // Sende an alle im Netzwerk
+    Serial.println("Sende aktualisierte SmartGridData an alle Module.");
 }
 
 
@@ -975,7 +992,6 @@ void SmartGrid::updateLED() {
     // Setze alle LEDs entsprechend
 
     if (isStorage(myModuleType)) {
-        renderStorageBarForOwnModule();
         return; // nichts anderes danach überschreiben lassen
     }
 
@@ -1036,12 +1052,6 @@ void SmartGrid::update() {
             break;
         case MODE_AUTOMATIK:
             runAutomatik();
-            break;
-        case MODE_TAGESZYKLUS:
-            runTageszyklus();
-            break;
-        case MODE_NACHTZYKLUS:
-            runNachtzyklus();
             break;
         case MODE_TAGNACHTZYKLUS:
             runTagNachtzyklus();
@@ -1125,6 +1135,7 @@ void SmartGrid::runInteraktiv() {
         break;
     case MODULE_SUBSTATION:
         // Logik für Umspannwerk
+        autoBalanceSubstationIdeal();
         break;
     case MODULE_MASTER:
         // Logik für Master-Modul
@@ -1133,13 +1144,11 @@ void SmartGrid::runInteraktiv() {
         break;
     }
     unsigned long time = millis();
-    if(checkForChanges() || (time-last_update)>5000) {
+    if(checkForChanges() || (time-last_update)>1000) {
         // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
         //sendNewSmartGridData();
-        Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
+        //Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
         updateSystemTime();
-        updateDisplay();
-        updateLED();
         last_update=millis();
     }
 }
@@ -1160,6 +1169,7 @@ void SmartGrid::runAutomatik() {
         break;
     case MODULE_BATTERY:
         // Logik für Batteriespeicher
+        renderStorageBarForOwnModule();
         break;
     case MODULE_HYDRO:
         // Logik für Wasserkraftmodul
@@ -1169,21 +1179,25 @@ void SmartGrid::runAutomatik() {
         break;
     case MODULE_HYDROGEN:
         // Logik für Wasserstoffmodul
+        renderStorageBarForOwnModule();
         break;
     case MODULE_PUMP_STORAGE:
         // Logik für Pumpspeicherkraftwerk
+        renderStorageBarForOwnModule();
         break;
     case MODULE_HOUSE:
         // Logik für Hausmodul
         break;  
     case MODULE_FACTORY:
         // Logik für Fabrikmodul
+        tickSmokeSimple();
         break;
     case MODULE_CAR:
         // Logik für Automodul
         break;
     case MODULE_SUBSTATION:
         // Logik für Umspannwerk
+        autoBalanceSubstationIdeal();
         break;
     case MODULE_MASTER:
         // Logik für Master-Modul
@@ -1192,22 +1206,22 @@ void SmartGrid::runAutomatik() {
         break;
     }
     //unsigned long time = millis();
-    if(checkForChanges() || (time-last_update)>5000) {
+    if(checkForChanges() || (time-last_update)>1000) {
         // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
         //sendNewSmartGridData();
         //Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
         Serial.print(".");
         updateSystemTime();
-        updateDisplay();
         updateLED();
         //printKnownPeers();
-        Serial.println("--------------------------------------------------------------------------------------------------------------------------------------------");
-        printRegistry();
+        //Serial.println("--------------------------------------------------------------------------------------------------------------------------------------------");
+        //printRegistry();
         last_update=millis();
     }
 }
 
-void SmartGrid::runTageszyklus() {
+
+void SmartGrid::runTagNachtzyklus() {
      switch (myModuleType)
     {
     case MODULE_WIND:
@@ -1218,6 +1232,7 @@ void SmartGrid::runTageszyklus() {
         break;
     case MODULE_BATTERY:
         // Logik für Batteriespeicher
+        renderStorageBarForOwnModule();
         break;
     case MODULE_HYDRO:
         // Logik für Wasserkraftmodul
@@ -1227,21 +1242,25 @@ void SmartGrid::runTageszyklus() {
         break;
     case MODULE_HYDROGEN:
         // Logik für Wasserstoffmodul
+        renderStorageBarForOwnModule();
         break;
     case MODULE_PUMP_STORAGE:
         // Logik für Pumpspeicherkraftwerk
+        renderStorageBarForOwnModule();
         break;
     case MODULE_HOUSE:
         // Logik für Hausmodul
         break;  
     case MODULE_FACTORY:
         // Logik für Fabrikmodul
+        tickSmokeSimple();
         break;
     case MODULE_CAR:
         // Logik für Automodul
         break;
     case MODULE_SUBSTATION:
         // Logik für Umspannwerk
+        autoBalanceSubstationIdeal();
         break;
     case MODULE_MASTER:
         // Logik für Master-Modul
@@ -1277,141 +1296,12 @@ void SmartGrid::runTageszyklus() {
     modeMakeStep = false; // Schritt wurde gemacht
   }
     unsigned long time = millis();
-    if(checkForChanges() || (time-last_update)>5000) {
+    if(checkForChanges() || (time-last_update)>1000) {
         // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
         //sendNewSmartGridData();
-        Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
+        //Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
         updateSystemTime();
-        updateDisplay();
-        updateLED();
         last_update=millis();
-    }
-}
-
-void SmartGrid::runNachtzyklus() {
-     switch (myModuleType)
-    {
-    case MODULE_WIND:
-        // Logik für Windmodul
-        break;
-    case MODULE_SOLAR:
-        // Logik für Solarmodul
-        break;
-    case MODULE_BATTERY:
-        // Logik für Batteriespeicher
-        break;
-    case MODULE_HYDRO:
-        // Logik für Wasserkraftmodul
-        break;
-    case MODULE_ELECTROLYZER:
-        // Logik für Elektrolyseur
-        break;
-    case MODULE_HYDROGEN:
-        // Logik für Wasserstoffmodul
-        break;
-    case MODULE_PUMP_STORAGE:
-        // Logik für Pumpspeicherkraftwerk
-        break;
-    case MODULE_HOUSE:
-        // Logik für Hausmodul
-        break;  
-    case MODULE_FACTORY:
-        // Logik für Fabrikmodul
-        break;
-    case MODULE_CAR:
-        // Logik für Automodul
-        break;
-    case MODULE_SUBSTATION:
-        // Logik für Umspannwerk
-        break;
-    case MODULE_MASTER:
-        // Logik für Master-Modul
-        break;
-    default:
-        break;
-    }
-    unsigned long time = millis();
-    if(checkForChanges() || (time-last_update)>5000) {
-        // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
-        //sendNewSmartGridData();
-        Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
-        updateDisplay();
-        updateLED();
-        last_update=millis();
-    }
-}
-
-void SmartGrid::runTagNachtzyklus() {
-     switch (myModuleType)
-    {
-    case MODULE_WIND:
-        // Logik für Windmodul
-        break;
-    case MODULE_SOLAR:
-        // Logik für Solarmodul
-        break;
-    case MODULE_BATTERY:
-        // Logik für Batteriespeicher
-        break;
-    case MODULE_HYDRO:
-        // Logik für Wasserkraftmodul
-        break;
-    case MODULE_ELECTROLYZER:
-        // Logik für Elektrolyseur
-        break;
-    case MODULE_HYDROGEN:
-        // Logik für Wasserstoffmodul
-        break;
-    case MODULE_PUMP_STORAGE:
-        // Logik für Pumpspeicherkraftwerk
-        break;
-    case MODULE_HOUSE:
-        // Logik für Hausmodul
-        break;  
-    case MODULE_FACTORY:
-        // Logik für Fabrikmodul
-        break;
-    case MODULE_CAR:
-        // Logik für Automodul
-        break;
-    case MODULE_SUBSTATION:
-        // Logik für Umspannwerk
-        break;
-    case MODULE_MASTER:
-        // Logik für Master-Modul
-        break;
-    default:
-        break;
-    }
-     uint32_t now = millis();
-  if (now - last_update > time_per_step) {
-    // nächsten Profil‑Punkt
-    SmartGridData data;
-    data = getSmartGridData();
-    data.current_consumption = consProfile[cycleIndex];
-    data.current_generation = genProfile[cycleIndex];
-    setSmartGridData(data);
-
-    // Ausgabe zu Debug
-    Serial.printf("Step %u: cons=%.1f, gen=%.1f\n",
-                  cycleIndex,
-                  data.current_consumption,
-                  data.current_generation);
-
-    // Index und Zeit updaten
-    cycleIndex = (cycleIndex + 1) % profileSize;
-    modeMakeStep = false; // Schritt wurde gemacht
-    lastStepMs = now; // Aktuelle Zeit als letzte Schrittzeit speichern
-  }
-    unsigned long time = millis();
-    if(checkForChanges() || (time-last_update)>5000) {
-        // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
-        //sendNewSmartGridData();
-        Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
-        updateSystemTime();
-        updateDisplay();
-        updateLED();
-        last_update = millis();
     }
 }
 
@@ -1431,6 +1321,7 @@ void SmartGrid::runPause() {
         break;
     case MODULE_BATTERY:
         // Logik für Batteriespeicher
+        //renderStorageBarForOwnModule();
         break;
     case MODULE_HYDRO:
         // Logik für Wasserkraftmodul
@@ -1440,15 +1331,17 @@ void SmartGrid::runPause() {
         break;
     case MODULE_HYDROGEN:
         // Logik für Wasserstoffmodul
+        //renderStorageBarForOwnModule();
         break;
     case MODULE_PUMP_STORAGE:
         // Logik für Pumpspeicherkraftwerk
+        //renderStorageBarForOwnModule();
         break;
     case MODULE_HOUSE:
         // Logik für Hausmodul
         break;  
     case MODULE_FACTORY:
-        tickSmokeSimple();
+        //tickSmokeSimple();
         //Serial.println("F");
         break;
     case MODULE_CAR:
@@ -1463,12 +1356,12 @@ void SmartGrid::runPause() {
     default:
         break;
     }
-    if(checkForChanges() || (time-last_update)>5000) {
+    if(checkForChanges() || (time-last_update)>1000) {
         // Wenn sich etwas geändert hat, aktualisiere die Anzeige und LEDs
         //sendNewSmartGridData();
-        Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
-        updateDisplay();
-        updateLED();
+        //Serial.println("Daten haben sich geändert, aktualisiere Anzeige und LEDs...");
+        //updateDisplay();
+        //updateLED();
         last_update=millis();
     }
 }
@@ -1600,9 +1493,6 @@ void SmartGrid::begin() {
     smokeDuty        = 0.0f;
     smokeCycleStart  = millis();
 
-
-    
-
     Serial.println("module_type: " + String(myModuleType));
 
     SmartGridData initialData;
@@ -1625,17 +1515,23 @@ void SmartGrid::begin() {
 
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
+    // Zufälligen Jitter aus Hardware-RNG (0..JOIN_JITTER_MAX_MS)
+    uint32_t r = esp_random();  // echter HW-Zufall
+    uint16_t joinJitterMs = r % (JOIN_JITTER_MAX_MS + 1);
+
+    Serial.print("[BEGIN] Join-Jitter: ");
+    Serial.print(joinJitterMs);
+    Serial.println(" ms (HW-RNG)");
+
+    // BLOCKING JITTER (hier ok)
+    delay(joinJitterMs);
+
     // Sende Join-Message
     sendJoinMessage();
 
     startAnimation(LedAnimation::STARTUP);
 
-    //currentAnimation = LedAnimation::STARTUP;
-    //checkAnimation = true;
-
     Serial.println("SmartGrid Initialisierung gestartet. Warte auf Registry...");
-
-    //delay(1000); // Kurze Pause, um sicherzustellen, dass das System bereit ist
 
 }
 
@@ -1995,19 +1891,19 @@ void SmartGrid::renderStorageBarForOwnModule() {
     const SmartGridData d = getSmartGridData();
 
     // --- SOC → Anzahl LEDs ---
-    float socPct = d.current_storage / lim.capacityWh;              // 0..1
+    float socPct = d.current_storage / lim.capacityWh;  // 0..1
     if (!isfinite(socPct)) socPct = 0.0f;
     socPct = fmaxf(0.0f, fminf(1.0f, socPct));
 
     int lit = (int)lroundf(socPct * NUM_LEDS);
     lit = fmax(0, fmin(NUM_LEDS, lit));
-    if (socPct > 0.0f && lit == 0) lit = 1;                         // min. 1 LED, wenn >0%
+    if (socPct > 0.0f && lit == 0) lit = 1;  // min. 1 LED, wenn >0%
 
     // --- Lade-/Entladerichtung & Intensität ---
-    float netW = d.current_generation - d.current_consumption;      // >0 = entladen/abgeben, <0 = laden/aufnehmen
+    float netW = d.current_generation - d.current_consumption;  // >0 = entladen/abgeben, <0 = laden/aufnehmen
 
-    CRGB col = CRGB::Blue;    // Idle
-    uint8_t br = 60;          // Grundhelligkeit für Idle
+    CRGB col = CRGB::Blue;   // Idle
+    uint8_t br = 60;         // Grundhelligkeit für Idle
     if (fabsf(netW) <= deadbandW) {
         // Idle
         col = CRGB::Blue;
@@ -2026,11 +1922,25 @@ void SmartGrid::renderStorageBarForOwnModule() {
     }
 
     // --- LEDs setzen: erster 'lit' Bereich = Farbe/Helligkeit, Rest aus ---
-        FastLED.setBrightness(br); // dynamisch
-        fill_solid(leds, lit, col);
-        fill_solid(leds+lit, NUM_LEDS - lit, CRGB::Black);
-        FastLED.show();
+    FastLED.setBrightness(br); // dynamisch
+    fill_solid(leds, lit, CRGB::Blue);
+    fill_solid(leds+lit, NUM_LEDS - lit, CRGB::Black);
 
+    // --- einfacher 500ms-Spinner über dem aktiven Bereich ---
+
+    if (lit > 0) {
+        unsigned long nowled = millis();
+        if ((int32_t)(nowled - lastStepMs_led) >= (int32_t)STEP_PERIOD_MS) {
+            lastStepMs_led = nowled;
+            // vorwärts (cw). Für rückwärts: led_step = (led_step - 1 + lit) % lit;
+                    int dir = (netW < 0) ? +1 : -1;
+                    led_step = (led_step + dir) % lit;
+                    if (led_step < 0) led_step += lit;
+        }
+    fill_solid(leds+led_step, 1, col);
+    }
+
+    FastLED.show();
 
     // Optionales Feedback, wenn voll/leer:
     // Voll → letzte LED kurz blitzen
@@ -2051,7 +1961,7 @@ void SmartGrid::renderStorageBarForOwnModule() {
     FastLED.show();
 
 #if DEBUG_FULL
-    Serial.printf("[STORAGE] SOC=%.0f%%  netW=%.1fW  lit=%d  col=%s  br=%u\n",
+    Serial.printf("[STORAGE] SOC=%.0f%% netW=%.1fW lit=%d col=%s br=%u\n",
                   socPct*100.0f, netW, lit,
                   (col==CRGB::Green?"Green":(col==CRGB::Red?"Red":"Blue")),
                   br);
@@ -2059,4 +1969,55 @@ void SmartGrid::renderStorageBarForOwnModule() {
 }
 
 
+
+
+
+
+// Hält den Netzsaldo ideal bei 0 (unendliche Import/Export-Fähigkeit)
+void SmartGrid::autoBalanceSubstationIdeal() {
+    if (myModuleType != MODULE_SUBSTATION) return;
+
+    // 1) Netto aller anderen Module (Gen - Cons)
+    float netOthers = 0.0f;
+    for (int i = 0; i < moduleRegistry.count; ++i) {
+        const auto& m = moduleRegistry.modules[i];
+        if (!memcmp(m.mac, own_mac, 6)) continue; // eigenes Modul überspringen
+        netOthers += (m.data.current_generation - m.data.current_consumption);
+    }
+
+    // 2) Deadband, damit es nicht flattert
+    const float deadbandW = 10.0f; // ±10 W neutral
+    float exportW = 0.0f; // als Generation
+    float importW = 0.0f; // als Consumption
+
+    if (fabsf(netOthers) <= deadbandW) {
+        // Neutral → nichts tun
+        exportW = 0.0f;
+        importW = 0.0f;
+    } else if (netOthers > 0) {
+        // Netz hat Überschuss → wir exportieren genau diesen Überschuss
+        exportW = netOthers;
+        importW = 0.0f;
+    } else { // netOthers < 0
+        // Netz hat Mangel → wir importieren genau diesen Mangel
+        exportW = 0.0f;
+        importW = -netOthers;
+    }
+
+    // 3) Nur updaten, wenn sich etwas merklich ändert (Funk sparen)
+    SmartGridData d = getSmartGridData();
+    const float changeTh = 5.0f; // >5 W → senden
+    bool changed =
+        fabsf(d.current_generation - importW) > changeTh ||
+        fabsf(d.current_consumption - exportW) > changeTh;
+
+    if (changed) {
+        d.current_generation = importW;   // Export = Generation
+        d.current_consumption = exportW;  // Import = Consumption
+        setSmartGridData(d);
+
+        Serial.printf("[SUBSTATION] netOthers=%.1fW  -> Export=%.1fW  Import=%.1fW\n",
+                      netOthers, exportW, importW);
+    }
+}
 
