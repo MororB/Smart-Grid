@@ -1,0 +1,3310 @@
+[
+    {
+        "id": "eccf2d53df5f40e0",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "701f4b41ab8799d9",
+        "type": "group",
+        "z": "eccf2d53df5f40e0",
+        "name": "Timer",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "e275a0c38bf4c2f0",
+            "e91ced042df54ef9",
+            "a235f2a7a62c2cae",
+            "5bc99988a91ae173",
+            "aa1bde32cf9fccc1",
+            "3074bcd44c80d0ce",
+            "afc1ec9c458a634b",
+            "43ad202f4fc8ec44"
+        ],
+        "x": 14,
+        "y": 2519,
+        "w": 612,
+        "h": 202
+    },
+    {
+        "id": "fa403590d0b575cc",
+        "type": "group",
+        "z": "eccf2d53df5f40e0",
+        "name": "Realdata to Graph",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "d57463f7e9222fe4",
+            "55e7ca0c46ea6df1",
+            "a9f1219cb299e1b7",
+            "f3e6141ba9118dd4",
+            "0c538863b324fb13",
+            "d82d4a860dbc70dc",
+            "31776acc3f7e1aeb",
+            "56dc86de1207a491"
+        ],
+        "x": 654,
+        "y": 2419,
+        "w": 792,
+        "h": 202
+    },
+    {
+        "id": "2966d2efc88ef368",
+        "type": "group",
+        "z": "eccf2d53df5f40e0",
+        "name": "CSV zu SQLite",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "7ed270b4403821d6",
+            "3b4a991d402a1b14",
+            "dd0449c4608d0e66",
+            "554481a25ab0579e"
+        ],
+        "x": 14,
+        "y": 2099,
+        "w": 972,
+        "h": 82
+    },
+    {
+        "id": "d2e0469520506a3d",
+        "type": "group",
+        "z": "eccf2d53df5f40e0",
+        "name": "Send-Data",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "fd3cb73a2c547cd0",
+            "d1cc5151dcf8c87b",
+            "f64b8ee0079109e0",
+            "4ca8556023554825"
+        ],
+        "x": 654,
+        "y": 2639,
+        "w": 652,
+        "h": 142
+    },
+    {
+        "id": "f409086811153cfe",
+        "type": "ui-template",
+        "z": "eccf2d53df5f40e0",
+        "group": "bb3c3d3f30d954da",
+        "page": "",
+        "ui": "",
+        "name": "World",
+        "order": 1,
+        "width": 0,
+        "height": 16,
+        "head": "",
+        "format": "<template>\n    <iframe src=\"/worldmap\" class=\"worldmap\"></iframe>\n</template>\n<style>\n  .worldmap {\n    width: 70%;\n    height: 70%;  \n  }\n</style>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 1050,
+        "y": 860,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "952ea852a94a677d",
+        "type": "serial in",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "serial": "09b5aa6184335f85",
+        "x": 90,
+        "y": 140,
+        "wires": [
+            [
+                "c530cf90f2a9345f",
+                "442e28418f5778a0"
+            ]
+        ]
+    },
+    {
+        "id": "c530cf90f2a9345f",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug serial out",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 460,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "3322b85b1d9eec4e",
+        "type": "serial out",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "serial": "09b5aa6184335f85",
+        "x": 750,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "2aead55e76a74b25",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 380,
+        "y": 520,
+        "wires": [
+            [
+                "3322b85b1d9eec4e",
+                "5b928269cb9890a9"
+            ]
+        ]
+    },
+    {
+        "id": "442e28418f5778a0",
+        "type": "json",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 250,
+        "y": 240,
+        "wires": [
+            [
+                "62d6aa02cba859bc"
+            ]
+        ]
+    },
+    {
+        "id": "e0664c4f2841a5da",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 360,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "033e6ef60f464a90",
+        "type": "json",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 530,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ff9575a9ea70e641",
+        "type": "ui-table",
+        "z": "eccf2d53df5f40e0",
+        "group": "393cd82ac3f9e3f9",
+        "name": "",
+        "label": "",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "maxrows": 0,
+        "passthru": false,
+        "autocols": true,
+        "showSearch": true,
+        "deselect": true,
+        "selectionType": "none",
+        "columns": [],
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "replace",
+        "x": 790,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "65cd29c908ec6b96",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "function 1",
+        "func": "// Hol dir das bestehende Map-Objekt aus flow context (oder lege neu an)\nlet tableMap = flow.get('tableMap') || {};\n\n// d = empfangene Daten\nconst d = msg.payload.data;\n\n// Baue den Eintrag – speichere Modul weiter als Zahl!\ntableMap[d.id] = {\n    id:          d.id,\n    timestamp:   d.timestamp,\n    module:      d.module,  // bleibt als Zahl gespeichert\n    mac:         d.mac,\n    consumption: d.current_consumption,\n    generation:  d.current_generation,\n    storage:     d.current_storage,\n    x:           d.coordinates.x,\n    y:           d.coordinates.y,\n    error:       d.error\n};\n\n// Speichere zurück ins context\nflow.set('tableMap', tableMap);\n\n// Mapping Zahl → Name (für Anzeige)\nconst MODULES = {\n  0:  'Master',\n  1:  'Solar',\n  2:  'Wind',\n  3:  'Wasserkraft',\n  4:  'Elektrolyseur',\n  5:  'Akku',\n  6:  'Wasserstoff',\n  7:  'Pumpspeicher',\n  8:  'Haus',\n  9:  'Fabrik',\n  10: 'Auto',\n  11: 'Umspannwerk'\n};\n\n// Für Tabelle: Array erzeugen und Modulnummern ersetzen\nmsg.payload = Object.values(tableMap).map(row => {\n    return {\n        ...row,\n        module: MODULES[row.module] || (\"Modul \" + row.module)\n    };\n});\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 380,
+        "wires": [
+            [
+                "ff9575a9ea70e641",
+                "6492e8ae5f87ebb9",
+                "31f82c92199113eb",
+                "e1a06b8521845d99"
+            ]
+        ]
+    },
+    {
+        "id": "6492e8ae5f87ebb9",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "62d6aa02cba859bc",
+        "type": "switch",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "property": "payload.cmd",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "ack",
+                "vt": "str"
+            },
+            {
+                "t": "neq",
+                "v": "ack",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 370,
+        "y": 300,
+        "wires": [
+            [],
+            [
+                "65cd29c908ec6b96"
+            ]
+        ]
+    },
+    {
+        "id": "82ff2e6cd687e61a",
+        "type": "ui-button",
+        "z": "eccf2d53df5f40e0",
+        "group": "393cd82ac3f9e3f9",
+        "name": "",
+        "label": "Next Step",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "{\"mac\":\"FF:FF:FF:FF:FF:FF\",\"cmd\":\"mode_next_step\"}",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 160,
+        "y": 1000,
+        "wires": [
+            [
+                "12e52e7206200434",
+                "ade5913c845fb976"
+            ]
+        ]
+    },
+    {
+        "id": "ade5913c845fb976",
+        "type": "json",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 350,
+        "y": 1040,
+        "wires": [
+            [
+                "4ead0fc581440ddd",
+                "b9b1db8fe55a732a"
+            ]
+        ]
+    },
+    {
+        "id": "12e52e7206200434",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 360,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "4ead0fc581440ddd",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 1080,
+        "wires": []
+    },
+    {
+        "id": "b9b1db8fe55a732a",
+        "type": "serial out",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "serial": "09b5aa6184335f85",
+        "x": 690,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "5b928269cb9890a9",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "caea9d894b5fab33",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 9",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 1360,
+        "wires": []
+    },
+    {
+        "id": "462fc3b8ec9c7896",
+        "type": "ui-button",
+        "z": "eccf2d53df5f40e0",
+        "group": "1b28ba4362c0e521",
+        "name": "Send",
+        "label": "button",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 650,
+        "y": 1700,
+        "wires": [
+            [
+                "eb2606b9bcab71f9"
+            ]
+        ]
+    },
+    {
+        "id": "eb2606b9bcab71f9",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "Sende Funktion",
+        "func": "// 1) ID & numeric Type-Index aus dem Flow-Context holen\nconst id   = flow.get('selectedId');\nconst type = flow.get('selectedType'); // 0,1,2 ODER evtl. schon ein String\n\nif (id === undefined || id === null || type === undefined || type === null) {\n  node.error(`selectedId (${id}) oder selectedType (${type}) fehlt im Context`);\n  return null;\n}\n\n// 2) Alle Arrays holen\nconst all = flow.get('sliderArrays') || {};\nconst dev = all[id] || {};\n\n// 3) Typ-Key robust ermitteln (Index -> Name, Name -> Name)\nconst TYPE_NAMES = ['Verbrauch','Erzeugung','Speicher'];\nconst typeName =\n  (typeof type === 'number' && Number.isFinite(type) ? TYPE_NAMES[type] : null) ||\n  (typeof type === 'string' ? type : null);\n\n// 4) 24er-Array finden: erst nach Namen, dann (Fallback) nach numerischem Key\nlet arr = null;\nif (typeName && Array.isArray(dev[typeName]) && dev[typeName].length === 24) {\n  arr = dev[typeName];\n} else if (typeof type === 'number' && Array.isArray(dev[type]) && dev[type].length === 24) {\n  // falls jemand unter numerischem Key gespeichert hat\n  arr = dev[type];\n}\n\nlet anchorPoints = [];\nif (Array.isArray(arr) && arr.length === 24) {\n  anchorPoints = arr.map(v => Number(v) || 0);\n} else {\n  const foundLen =\n    typeName && Array.isArray(dev[typeName]) ? dev[typeName].length :\n    (typeof type === 'number' && Array.isArray(dev[type]) ? dev[type].length : 0);\n  node.warn(`Kein gültiges 24h-Array für ID=${id}, TypeKey='${typeName ?? type}' gefunden (gefunden ${foundLen})`);\n  anchorPoints = Array(24).fill(0);\n}\n\n// 5) MAC aus Context\nlet mac = flow.get('selectedMac');\nif (!mac) {\n  node.warn(\"Keine selectedMac im Context – verwende FF:FF:FF:FF:FF:FF\");\n  mac = \"FF:FF:FF:FF:FF:FF\";\n}\n\n// 6) Zyklus-Dauer & Interpolations-Punkte\nlet cycleDuration = flow.get('cycleDuration');\nif (typeof cycleDuration !== 'number') { node.warn(\"No cycleDuration – default 3600\"); cycleDuration = 3600; }\nlet interpPoints = flow.get('interpPoints');\nif (typeof interpPoints !== 'number') { node.warn(\"No interpPoints – default 10\"); interpPoints = 10; }\n\n// 7) JSON bauen – type als NUMMER senden (falls String, auf Index mappen)\nconst typeIndex = (typeof type === 'number' && Number.isFinite(type))\n  ? type\n  : Math.max(0, TYPE_NAMES.indexOf(typeName));\n\nconst out = {\n  cmd:                  \"modify_mode\",\n  id:                   id,\n  mac:                  mac,\n  type:                 typeIndex,\n  n_anchor_points:      anchorPoints.length,\n  cycle_duration:       cycleDuration,\n  interpolation_points: interpPoints,\n  anchor_points:        anchorPoints\n};\n\nmsg.payload = out;\nnode.warn(\"Built JSON: \" + JSON.stringify(out));\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 1700,
+        "wires": [
+            [
+                "ce2401fcbac9afb6",
+                "98f8571f5adefb00"
+            ]
+        ]
+    },
+    {
+        "id": "fd281be9697c995f",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "Slider Value",
+        "func": "// msg.payload kann enthalten: { hour, value, id, type, season, preset }\n// -> preset = zuletzt angewendeter Presetname ('Custom' bei manuell)\n\nconst p = msg.payload || {};\nconst { hour, value, id, type, season, preset } = p;\n\nlet all = flow.get('sliderArrays') || {};\nlet lastPresetMap = flow.get('lastPresetMap') || {}; // Struktur: { [id]: { [type]: { preset, season, ts } } }\n\n// --- A) Preset/Season merken, wenn Info vorhanden ---\nif (Number.isFinite(id) && typeof type === 'string' && typeof season === 'string' && typeof preset === 'string') {\n  if (!lastPresetMap[id]) lastPresetMap[id] = {};\n  lastPresetMap[id][type] = {\n    preset,         // z.B. 'PV-Hochsommer' oder 'Custom'\n    season,         // z.B. 'Sommer'\n    ts: Date.now()  // optional\n  };\n  flow.set('lastPresetMap', lastPresetMap);\n}\n\n// --- B) Einzelwert speichern (klassisch) ---\nif (Number.isFinite(id) && typeof type === 'string' && Number.isFinite(hour)) {\n  if (!all[id]) all[id] = {};\n  if (!Array.isArray(all[id][type]) || all[id][type].length !== 24) {\n    all[id][type] = Array(24).fill(0);\n  }\n  all[id][type][hour] = Number(value) || 0;\n\n  flow.set('sliderArrays', all);\n\n  node.status({\n    fill: 'blue',\n    shape: 'dot',\n    text: `ID ${id}, ${type}, ${hour} Uhr = ${value} (${preset || '—'})`\n  });\n}\n\n// keine Weitergabe\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 1460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ce2401fcbac9afb6",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 10",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1140,
+        "y": 1600,
+        "wires": []
+    },
+    {
+        "id": "915b1ec3275b33d7",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 11",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 280,
+        "y": 1600,
+        "wires": []
+    },
+    {
+        "id": "cc08f02b030339d6",
+        "type": "ui-text-input",
+        "z": "eccf2d53df5f40e0",
+        "group": "1b28ba4362c0e521",
+        "name": "Cycle Duration",
+        "label": "Cycle duration",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "topic": "topic",
+        "topicType": "msg",
+        "mode": "number",
+        "tooltip": "",
+        "delay": 300,
+        "passthru": true,
+        "sendOnDelay": false,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "",
+        "clearable": false,
+        "sendOnClear": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "x": 240,
+        "y": 1700,
+        "wires": [
+            [
+                "50ecb66cc191e09e"
+            ]
+        ]
+    },
+    {
+        "id": "50ecb66cc191e09e",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "Save Cycle Duration",
+        "func": "// Function: Save selected cycle duration\n\n// 1. Aus dem Payload kommt die gewünschte Zyklusdauer (in Sekunden o.ä.)\nconst cycleDuration = parseInt(msg.payload, 10);\n\n// 2. Ab in den Flow‑Context\nflow.set('cycleDuration', cycleDuration);\n\n// 3. Status‑Anzeige am Node (optional)\nnode.status({\n  fill: \"blue\",\n  shape: \"dot\",\n  text: `Cycle-Duration: ${cycleDuration}`\n});\n\n// 4. Nachricht weiterreichen (oder return null, wenn Du hier nichts weiter anschließen willst)\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 1700,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "629a6accb4498b57",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "Save Interpolations Points",
+        "func": "// Function: Save selected interpolation points\n\n// 1. Lese den übergebenen Wert (z.B. aus einem Numeric‑Input)\n//    Hier gehen wir davon aus, dass msg.payload schon eine Zahl oder String-Zahl ist:\nconst interpPoints = parseInt(msg.payload, 10);\n\n// 2. Im Flow‑Context ablegen\nflow.set('interpPoints', interpPoints);\n\n// 3. Statusanzeige nur mit aktueller Einstellung\nnode.status({\n  fill: \"green\",\n  shape: \"dot\",\n  text: `Interp‑Points: ${interpPoints}`\n});\n\n// 4. Nachricht weitergeben (oder return null, wenn nicht benötigt)\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 1740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "494245d531742af5",
+        "type": "ui-text-input",
+        "z": "eccf2d53df5f40e0",
+        "group": "1b28ba4362c0e521",
+        "name": "InterpolationsPoints",
+        "label": "Interpolations Points",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "topic": "topic",
+        "topicType": "msg",
+        "mode": "number",
+        "tooltip": "",
+        "delay": 300,
+        "passthru": true,
+        "sendOnDelay": false,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "",
+        "clearable": false,
+        "sendOnClear": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "x": 250,
+        "y": 1740,
+        "wires": [
+            [
+                "629a6accb4498b57"
+            ]
+        ]
+    },
+    {
+        "id": "ea976c17879d460a",
+        "type": "ui-template",
+        "z": "eccf2d53df5f40e0",
+        "group": "1b28ba4362c0e521",
+        "page": "",
+        "ui": "",
+        "name": "",
+        "order": 4,
+        "width": "",
+        "height": "",
+        "head": "",
+        "format": "<template>\n  <div class=\"control-panel\">\n    <div class=\"dropdown-group\">\n      <div class=\"dropdown-item\">\n        <label for=\"selModule\" class=\"dropdown-label\">Modul</label>\n        <select id=\"selModule\" v-model.number=\"selectedModuleCode\" class=\"dropdown-select\">\n          <option v-for=\"code in moduleOptions\" :key=\"code\" :value=\"code\">\n            {{ moduleName(code) }} ({{ code }})\n          </option>\n        </select>\n      </div>\n\n      <div class=\"dropdown-item\">\n        <label for=\"selId\" class=\"dropdown-label\">Geräte-ID</label>\n        <select\n          id=\"selId\"\n          v-model.number=\"selectedId\"\n          class=\"dropdown-select\"\n          :disabled=\"filteredIds.length === 0\"\n        >\n          <option v-if=\"filteredIds.length === 0\" disabled value=\"\">– keine IDs –</option>\n          <option v-for=\"id in filteredIds\" :key=\"id\" :value=\"id\">{{ id }}</option>\n        </select>\n      </div>\n\n      <div class=\"dropdown-item\">\n        <label for=\"selType\" class=\"dropdown-label\">Art</label>\n        <select id=\"selType\" v-model=\"selectedType\" class=\"dropdown-select\">\n          <option v-for=\"t in availableTypes\" :key=\"t\" :value=\"t\">{{ t }}</option>\n        </select>\n      </div>\n\n      <div class=\"dropdown-item\">\n        <label for=\"selSeason\" class=\"dropdown-label\">Jahreszeit</label>\n        <select id=\"selSeason\" v-model=\"selectedSeason\" class=\"dropdown-select\">\n          <option v-for=\"s in availableSeasons\" :key=\"s\" :value=\"s\">{{ s }}</option>\n        </select>\n      </div>\n\n      <div class=\"dropdown-item\">\n        <label for=\"selPreset\" class=\"dropdown-label\">Preset</label>\n        <select id=\"selPreset\" v-model=\"selectedPreset\" class=\"dropdown-select\">\n          <option v-if=\"selectedPreset === null\" disabled value=\"\">– lädt –</option>\n          <option v-for=\"p in availablePresets\" :key=\"p\" :value=\"p\">{{ p }}</option>\n        </select>\n      </div>\n\n      <!-- rechte Statuszeile, inkl. kleiner MAC-Anzeige -->\n      <div class=\"debug-info\">\n        Modul: <strong>{{ moduleName(selectedModuleCode) }} ({{ selectedModuleCode ?? '—' }})</strong>,\n        ID: <strong>{{ selectedId }}</strong>,\n        <span class=\"mac\">MAC: <code>{{ selectedMac || '—' }}</code></span>,\n        Art: <strong>{{ selectedType }}</strong>,\n        Jahreszeit: <strong>{{ selectedSeason }}</strong>,\n        Preset: <strong>{{ selectedPreset ?? '—' }}</strong>\n      </div>\n    </div>\n\n    <div id=\"slider-container\" class=\"slider-container\">\n      <div v-for=\"(val, idx) in sliderValues\" :key=\"idx\" class=\"slider-item\">\n        <div class=\"slider-label\">{{ idx }} Uhr</div>\n        <input\n          type=\"range\"\n          v-model.number=\"sliderValues[idx]\"\n          :min=\"0\"\n          :max=\"3000\"\n          :step=\"100\"\n          @change=\"onSlider(idx)\"\n          class=\"slider-input\"\n        />\n        <div class=\"slider-value\">{{ sliderValues[idx] }}</div>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  props: ['msg'],\n  data() {\n    return {\n      availableTypes:   ['Verbrauch', 'Erzeugung', 'Speicher'],\n      availableSeasons: ['Frühling','Sommer','Herbst','Winter'],\n\n      selectedModuleCode: null,\n      selectedId:         null,\n      selectedMac:        '',\n\n      selectedType:       null,\n      selectedSeason:     'Frühling',\n      selectedPreset:     null, // Platzhalter bis Init\n\n      sliderValues:       Array(24).fill(0),\n      presetsAll:         {},\n\n      availableIds:  [],\n      idModuleMap:   {},\n\n      updatingFromInit: false\n    };\n  },\n  computed: {\n    moduleOptions() {\n      const codes = Object.keys(this.idModuleMap || {}).map(n => Number(n)).filter(Number.isFinite).sort((a,b)=>a-b);\n      return codes.length ? codes : (Number.isFinite(this.selectedModuleCode) ? [this.selectedModuleCode] : []);\n    },\n    filteredIds() {\n      const list = this.idModuleMap?.[this.selectedModuleCode];\n      return (Array.isArray(list) && list.length ? list : this.availableIds).slice().sort((a,b)=>a-b);\n    },\n    availablePresets() {\n      const names = new Set(['Custom']);\n      if (typeof this.selectedPreset === 'string' && this.selectedPreset.length) names.add(this.selectedPreset);\n      Object.keys(this.presetsAll || {}).forEach(k => names.add(k));\n      return Array.from(names);\n    }\n  },\n  mounted() {\n    this.selectedType   = this.availableTypes[0];\n    this.selectedSeason = this.availableSeasons[0];\n    if (!Array.isArray(this.sliderValues) || this.sliderValues.length !== 24) this.sliderValues = Array(24).fill(0);\n    this.syncSelection();\n    this.requestArray(false);\n  },\n  watch: {\n    msg: {\n      immediate: true,\n      handler(message) {\n        const p = (message && message.payload) || {};\n\n        if (Array.isArray(p.sliderValues) && p.sliderValues.length === 24) this.sliderValues = p.sliderValues.slice();\n        else if (!Array.isArray(this.sliderValues) || this.sliderValues.length !== 24) this.sliderValues = Array(24).fill(0);\n\n        if (Array.isArray(p.availableIds)) this.availableIds = p.availableIds.slice();\n        if (p.idModuleMap && typeof p.idModuleMap === 'object') this.idModuleMap = { ...p.idModuleMap };\n        if (p.presets) this.presetsAll = p.presets;\n\n        // Auswahl inkl. MAC aus Init übernehmen\n        if (\n          typeof p.selectedModuleCode !== 'undefined' ||\n          typeof p.selectedId === 'number' ||\n          typeof p.selectedType === 'string' ||\n          typeof p.selectedSeason === 'string' ||\n          typeof p.selectedPreset === 'string' ||\n          typeof p.selectedMac !== 'undefined'\n        ) {\n          this.updatingFromInit = true;\n\n          if (typeof p.selectedModuleCode !== 'undefined') this.selectedModuleCode = p.selectedModuleCode;\n          if (typeof p.selectedId === 'number') this.selectedId = p.selectedId;\n          if (typeof p.selectedMac !== 'undefined') this.selectedMac = p.selectedMac || '';\n\n          if (typeof p.selectedType   === 'string') this.selectedType   = p.selectedType;\n          if (typeof p.selectedSeason === 'string') this.selectedSeason = p.selectedSeason;\n          if (typeof p.selectedPreset === 'string') this.selectedPreset = p.selectedPreset;\n\n          this.$nextTick(() => {\n            if (this.selectedId == null || !this.filteredIds.includes(this.selectedId)) {\n              this.selectedId = this.filteredIds[0] ?? null;\n            }\n            this.updatingFromInit = false;\n          });\n        }\n      }\n    },\n\n    // Modul-/ID-Wechsel → remembered Preset holen; MAC kommt über Init\n    selectedModuleCode(newV, oldV) {\n      if (this.updatingFromInit || newV === oldV) return;\n      if (!this.filteredIds.includes(this.selectedId)) this.selectedId = this.filteredIds[0] ?? null;\n      this.presetsAll = {};\n      this.selectedPreset = null;\n      this.onSelectionChange(false);\n    },\n    selectedId(newV, oldV) {\n      if (this.updatingFromInit || newV === oldV) return;\n      this.presetsAll = {};\n      this.selectedPreset = null;\n      this.onSelectionChange(false);\n    },\n\n    // Type/Season-Wechsel → Custom erzwingen\n    selectedType(newV, oldV) {\n      if (this.updatingFromInit || newV === oldV) return;\n      this.selectedPreset = 'Custom';\n      this.onSelectionChange(true);\n    },\n    selectedSeason(newV, oldV) {\n      if (this.updatingFromInit || newV === oldV) return;\n      this.selectedPreset = 'Custom';\n      this.onSelectionChange(true);\n    },\n\n    selectedPreset(newV, oldV) {\n      if (this.updatingFromInit || newV === oldV) return;\n      if (newV === null) return;\n      this.syncSelection();\n      if (newV !== 'Custom') this.applyPreset();\n      else this.requestArray(true);\n    }\n  },\n  methods: {\n    moduleName(code) {\n      const map = {0:'Master',1:'Solar',2:'Wind',3:'Wasserkraft',4:'Elektrolyseur',5:'Batterie',6:'Wasserstoff',7:'Pumpspeicher',8:'Haus',9:'Fabrik',10:'Auto',11:'Umspannwerk'};\n      if (!Number.isFinite(code)) return '—';\n      return map[code] ?? `Modul ${code}`;\n    },\n\n    syncSelection() {\n      this.send({\n        payload: {\n          selection: true,\n          module: this.selectedModuleCode,\n          id: this.selectedId,\n          type: this.selectedType,\n          season: this.selectedSeason,\n          preset: this.selectedPreset === null ? undefined : this.selectedPreset\n        }\n      });\n    },\n\n    onSelectionChange(includePreset) {\n      this.syncSelection();\n      this.requestArray(includePreset === true);\n    },\n\n    applyPreset() {\n      const arr = this.presetsAll[this.selectedPreset] || Array(24).fill(0);\n      this.sliderValues = (Array.isArray(arr) && arr.length === 24) ? arr.slice() : Array(24).fill(0);\n      this.sliderValues.forEach((value, hour) => {\n        this.send({\n          payload: {\n            hour, value,\n            module: this.selectedModuleCode,\n            id: this.selectedId,\n            type: this.selectedType,\n            season: this.selectedSeason,\n            preset: this.selectedPreset\n          }\n        });\n      });\n    },\n\n    requestArray(includePreset = false) {\n      if (!Array.isArray(this.sliderValues) || this.sliderValues.length !== 24) this.sliderValues = Array(24).fill(0);\n      const payload = {\n        init: true,\n        module: this.selectedModuleCode,\n        id: this.selectedId,\n        type: this.selectedType,\n        season: this.selectedSeason\n      };\n      if (includePreset && this.selectedPreset !== null) payload.preset = this.selectedPreset;\n      this.send({ payload });\n    },\n\n    onSlider(hour) {\n      const value = this.sliderValues[hour];\n      this.send({\n        payload: {\n          hour, value,\n          module: this.selectedModuleCode,\n          id: this.selectedId,\n          type: this.selectedType,\n          season: this.selectedSeason,\n          preset: this.selectedPreset === null ? 'Custom' : this.selectedPreset\n        }\n      });\n    }\n  }\n};\n</script>\n\n<style scoped>\n.control-panel { padding:12px; background:#f9f9f9; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);}   \n.dropdown-group { display:flex; align-items:center; gap:16px; margin-bottom:12px; flex-wrap:wrap; }  \n.dropdown-item { display:flex; flex-direction:column; min-width:200px; }  \n.dropdown-label { font-weight:600; margin-bottom:4px; font-size:0.9em;}  \n.dropdown-select { padding:4px 8px; border:1px solid #ccc; border-radius:4px;}  \n.debug-info { margin-left:auto; font-size:0.85em; color:#666; white-space:nowrap; display:flex; gap:10px; align-items:center; }  \n.debug-info .mac code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace; font-size:0.9em; }  \n.slider-container { display:flex; overflow-x:auto; align-items:flex-end; height:380px; gap:8px;}  \n.slider-item { display:flex; flex-direction:column; align-items:center;}  \n.slider-label { margin-bottom:4px; font-weight:bold;}  \n.slider-input { width:20px; height:300px; -webkit-appearance:slider-vertical; writing-mode:bt-lr;}  \n.slider-value { margin-top:4px; font-size:0.8em;}  \n</style>\n",
+        "storeOutMessages": true,
+        "passthru": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 400,
+        "y": 1460,
+        "wires": [
+            [
+                "caea9d894b5fab33",
+                "fd281be9697c995f",
+                "b70f7bd9d2d22202",
+                "2002c7e3aa4a8483",
+                "615278b7631cbbdc",
+                "27401d1ff0e2acec",
+                "52885901cca1e2e4"
+            ]
+        ],
+        "outputLabels": [
+            "1"
+        ]
+    },
+    {
+        "id": "2002c7e3aa4a8483",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "Init-Funktion",
+        "func": "// Init-Function (vor ui_template-Node ausführen)\n\nconst tableMap = flow.get('tableMap') || {};\nconst allArrays = flow.get('sliderArrays') || {};\nconst lastKey = flow.get('lastInitKey') || '';\nconst lastSelId = flow.get('lastSelectedId');\nconst lastPresetMap = flow.get('lastPresetMap') || {}; // { [id]: { [type]: { preset, season, ts } } }\n\nconst MODULES = {\n  0: 'Master', 1: 'Solar', 2: 'Wind', 3: 'Wasserkraft', 4: 'Elektrolyseur',\n  5: 'Batterie', 6: 'Wasserstoff', 7: 'Pumpspeicher', 8: 'Haus', 9: 'Fabrik',\n  10: 'Auto', 11: 'Umspannwerk'\n};\n\nfunction getAvailableIds(map) {\n  return Object.keys(map).map(Number).filter(Number.isFinite).sort((a, b) => a - b);\n}\nfunction buildIdModuleMap(map) {\n  const out = {};\n  for (const [k, v] of Object.entries(map)) {\n    const id = Number(k);\n    const mod = Number(v && v.module);\n    if (!Number.isFinite(id) || !Number.isFinite(mod)) continue;\n    if (!out[mod]) out[mod] = [];\n    out[mod].push(id);\n  }\n  Object.keys(out).forEach(m => out[m].sort((a, b) => a - b));\n  return out;\n}\nfunction pickMostRecentId(map, ids) {\n  if (!ids || !ids.length) return null;\n  return ids.slice().sort((a, b) => ((map[b]?.timestamp || 0) - (map[a]?.timestamp || 0)))[0];\n}\n\nif (msg.payload && msg.payload.init === true) {\n  const availableIds = getAvailableIds(tableMap);\n  const idModuleMap = buildIdModuleMap(tableMap);\n\n  let reqModule = Number.isFinite(msg.payload.module) ? msg.payload.module : null;\n  const idFromMsg  = Number.isFinite(msg.payload.id) ? msg.payload.id : null;\n  const idFromLast = Number.isFinite(lastSelId) ? lastSelId : null;\n  const recentId   = pickMostRecentId(tableMap, availableIds);\n\n  if (reqModule == null && idFromMsg  != null && Number.isFinite(tableMap[idFromMsg ]?.module)) reqModule = tableMap[idFromMsg ].module;\n  if (reqModule == null && idFromLast != null && Number.isFinite(tableMap[idFromLast]?.module)) reqModule = tableMap[idFromLast].module;\n  if (reqModule == null && recentId   != null && Number.isFinite(tableMap[recentId  ]?.module)) reqModule = tableMap[recentId  ].module;\n  if (reqModule == null) {\n    const modCodes = Object.keys(idModuleMap).map(Number).filter(Number.isFinite).sort((a, b) => a - b);\n    reqModule = modCodes.length ? modCodes[0] : null;\n  }\n\n  const moduleIds = (reqModule != null && Array.isArray(idModuleMap[reqModule])) ? idModuleMap[reqModule].slice() : availableIds.slice();\n\n  let id = null;\n  if (idFromMsg  != null && moduleIds.includes(idFromMsg )) id = idFromMsg;\n  else if (idFromLast != null && moduleIds.includes(idFromLast)) id = idFromLast;\n  else id = pickMostRecentId(tableMap, moduleIds);\n\n  const reqType   = (typeof msg.payload.type   === 'string' && msg.payload.type)   || 'Verbrauch';\n  const reqSeason = (typeof msg.payload.season === 'string' && msg.payload.season) || 'Frühling';\n  const reqPreset = (typeof msg.payload.preset === 'string' && msg.payload.preset) || null;\n\n  const remembered = (Number.isFinite(id) && lastPresetMap[id] && lastPresetMap[id][reqType])\n    ? lastPresetMap[id][reqType]\n    : null;\n\n  const selectedPreset = reqPreset || (remembered?.preset || 'Custom');\n  const selectedSeason = reqPreset ? reqSeason : (remembered?.season || reqSeason);\n\n  // 24er-Array laden (oder Nullen)\n  let arr = Array(24).fill(0);\n  if (Number.isFinite(id) && allArrays[id] && Array.isArray(allArrays[id][reqType]) && allArrays[id][reqType].length === 24) {\n    arr = allArrays[id][reqType];\n  }\n\n  // >>> ID & MAC im Context ablegen\n  if (Number.isFinite(id)) {\n    const thisKey = `${id}-${reqType}`;\n    if (thisKey !== lastKey) flow.set('lastInitKey', thisKey);\n    flow.set('lastSelectedId', id);\n    flow.set('selectedId', id);\n  }\n  const mac = (Number.isFinite(id) && tableMap[id] && tableMap[id].mac) ? tableMap[id].mac : null;\n  flow.set('selectedMac', mac);\n\n  const moduleName = (reqModule != null && MODULES.hasOwnProperty(reqModule)) ? MODULES[reqModule] : (reqModule == null ? null : `Modul ${reqModule}`);\n\n  msg.payload = {\n    sliderValues: arr,\n    availableIds,\n    idModuleMap,\n\n    selectedModuleCode: reqModule,\n    selectedModuleName: moduleName || '',\n    selectedId: Number.isFinite(id) ? id : null,\n    selectedType: reqType,\n    selectedSeason,\n    selectedPreset,\n\n    // >>> MAC ans UI (optional, aber hilfreich)\n    selectedMac: mac\n  };\n\n  node.status({ fill: \"green\", shape: \"dot\", text: `Init Modul=${moduleName ?? '-'} ID=${id ?? '—'} MAC=${mac ?? '—'} Type=${reqType} Preset=${selectedPreset}` });\n  return msg;\n}\n\nif (msg.payload && msg.payload.init) {\n  node.warn(`Init request malformed: ${JSON.stringify(msg.payload)}`);\n}\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 110,
+        "y": 1460,
+        "wires": [
+            [
+                "ea976c17879d460a",
+                "f79263b57a75a185"
+            ]
+        ]
+    },
+    {
+        "id": "f79263b57a75a185",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 14",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 260,
+        "y": 1380,
+        "wires": []
+    },
+    {
+        "id": "21b253d9721696cc",
+        "type": "ui-chart",
+        "z": "eccf2d53df5f40e0",
+        "group": "1b28ba4362c0e521",
+        "name": "Summe der Art",
+        "label": "Summe der Arten",
+        "order": 5,
+        "chartType": "line",
+        "category": "series",
+        "categoryType": "property",
+        "xAxisLabel": "Stunden",
+        "xAxisProperty": "x",
+        "xAxisPropertyType": "property",
+        "xAxisType": "linear",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "",
+        "yAxisProperty": "y",
+        "yAxisPropertyType": "property",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "replace",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "24",
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "8",
+        "height": "8",
+        "className": "",
+        "interpolation": "cubic",
+        "x": 940,
+        "y": 1540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "615278b7631cbbdc",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "SUM der Arten",
+        "func": "// Multi-Series in EINER Nachricht (Series=key: 'series'; X=key: 'x'; Y=key: 'y')\n\nconst typeFromMsg = (msg.payload && typeof msg.payload.type === 'string') ? msg.payload.type : null;\nconst type = typeFromMsg || flow.get('selectedType') || 'Verbrauch';\n\nconst all = flow.get('sliderArrays') || {};\n\n// IDs mit gültigem 24er-Array für den Typ\nconst ids = Object.keys(all)\n  .map(k => Number(k))\n  .filter(id => Number.isFinite(id) && all[id] && Array.isArray(all[id][type]) && all[id][type].length === 24)\n  .sort((a,b) => a - b);\n\n// Summe berechnen\nconst summed = Array(24).fill(0);\nids.forEach(id => {\n  const arr = all[id][type];\n  for (let h = 0; h < 24; h++) summed[h] += Number(arr[h]) || 0;\n});\n\n// Punkte bauen: erst Summe, dann jede ID\nconst points = [];\nfor (let h = 0; h < 24; h++) {\n  points.push({ series: 'Summe', x: h, y: summed[h] });\n}\nids.forEach(id => {\n  const arr = all[id][type];\n  for (let h = 0; h < 24; h++) {\n    points.push({ series: `ID ${id}`, x: h, y: Number(arr[h]) || 0 });\n  }\n});\n\n// an Chart senden (+ optionale Achsentitel)\nmsg.payload = points;\nmsg.ui_control = {\n  options: {\n    parsing: { xAxisKey: 'x', yAxisKey: 'y' },\n    scales: {\n      x: {\n        type: 'linear',\n        min: 0, max: 23,\n        title: { display: true, text: 'Stunde' },\n        ticks: { stepSize: 1 }\n      },\n      y: {\n        beginAtZero: true,\n        title: { display: true, text: type }\n      }\n    },\n    plugins: { legend: { display: true } }\n  }\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 1540,
+        "wires": [
+            [
+                "21b253d9721696cc",
+                "bd0c17b41daa5371"
+            ]
+        ]
+    },
+    {
+        "id": "54c49e10b5722e96",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 12",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 920,
+        "y": 1500,
+        "wires": []
+    },
+    {
+        "id": "d3ac05acbd9345a0",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 340,
+        "wires": [
+            [
+                "31f82c92199113eb"
+            ]
+        ]
+    },
+    {
+        "id": "b70f7bd9d2d22202",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "Save Selection",
+        "func": "// Function \"Save Selection\" – mappt type → Zahl (0/1)\nconst { init, id, type } = msg.payload;\nif (init) {\n  // ID wie gehabt speichern\n  if (id) flow.set('selectedId', id);\n\n  // Type als Zahl speichern: 0=Verbrauch, 1=Erzeugung\n  const typeMap = {\n    'Verbrauch': 0,\n    'Erzeugung': 1\n  };\n  if (type in typeMap) {\n    flow.set('selectedType', typeMap[type]);\n  } else {\n    node.warn(`Unbekannter type «${type}» – selectedType nicht gesetzt`);\n  }\n}\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 1620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e103366a7038293c",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "INIT DB",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "CREATE TABLE IF NOT EXISTS presets (   type TEXT,   name TEXT,   data TEXT ); ",
+        "payload": "",
+        "payloadType": "date",
+        "x": 210,
+        "y": 1800,
+        "wires": [
+            [
+                "3c2867db419fb87b"
+            ]
+        ]
+    },
+    {
+        "id": "3c2867db419fb87b",
+        "type": "sqlite",
+        "z": "eccf2d53df5f40e0",
+        "mydb": "f2f24f247aa43f9b",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "TestDB",
+        "x": 480,
+        "y": 1860,
+        "wires": [
+            [
+                "b673bc0f0f6d668d"
+            ]
+        ]
+    },
+    {
+        "id": "b673bc0f0f6d668d",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 1860,
+        "wires": []
+    },
+    {
+        "id": "98f8571f5adefb00",
+        "type": "serial out",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "serial": "09b5aa6184335f85",
+        "x": 1030,
+        "y": 1700,
+        "wires": []
+    },
+    {
+        "id": "a1f6a4ea72e6b1bc",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "SELECT * FROM presets;",
+        "payload": "",
+        "payloadType": "date",
+        "x": 220,
+        "y": 1920,
+        "wires": [
+            [
+                "c1c7b439fe31192c"
+            ]
+        ]
+    },
+    {
+        "id": "c1c7b439fe31192c",
+        "type": "sqlite",
+        "z": "eccf2d53df5f40e0",
+        "mydb": "f2f24f247aa43f9b",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "mit .topic",
+        "x": 480,
+        "y": 1920,
+        "wires": [
+            [
+                "89b030c38ba7ca2d"
+            ]
+        ]
+    },
+    {
+        "id": "89b030c38ba7ca2d",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 15",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 1920,
+        "wires": []
+    },
+    {
+        "id": "e87378cf7cb6339a",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "SELECT * FROM presets;",
+        "payload": "",
+        "payloadType": "date",
+        "x": 220,
+        "y": 2040,
+        "wires": [
+            [
+                "ed624acd0c5af322"
+            ]
+        ]
+    },
+    {
+        "id": "72b2bffd758d2433",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 220,
+        "y": 1860,
+        "wires": [
+            [
+                "3c2867db419fb87b"
+            ]
+        ]
+    },
+    {
+        "id": "0e4f32e95d94920c",
+        "type": "ui-table",
+        "z": "eccf2d53df5f40e0",
+        "group": "bad1f384ef16bad5",
+        "name": "",
+        "label": "",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "maxrows": 0,
+        "passthru": false,
+        "autocols": true,
+        "showSearch": true,
+        "deselect": true,
+        "selectionType": "none",
+        "columns": [],
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "replace",
+        "x": 670,
+        "y": 2040,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9caa4d663914c1f8",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "INSERT INTO presets (type, season, name, data) VALUES ('Verbrauch','Frühling','Fabrik-2-Schicht','[400,400,400,400,400,400,1200,1500,1700,1800,1900,2000,2000,2000,1600,1700,1800,1800,1700,1600,1500,1400,400,400]'), ('Verbrauch','Frühling','Fabrik-3-Schicht','[1200,1100,1100,1100,1100,1050,1800,1700,1700,1700,1700,1700,1700,1650,1500,1400,1400,1400,1400,1400,1400,1350,1200,1100]'), ('Verbrauch','Frühling','Fabrik-Dauerbetrieb','[1250,1250,1250,1250,1250,1300,1350,1350,1350,1300,1300,1300,1400,1400,1400,1400,1300,1300,1300,1300,1300,1300,1300,1300]'), ('Verbrauch','Sommer','Fabrik-2-Schicht','[450,450,450,450,450,450,1200,1500,1700,1800,1900,2100,2100,2100,1700,1800,1900,1900,1800,1700,1600,1500,450,450]'), ('Verbrauch','Sommer','Fabrik-3-Schicht','[1250,1150,1150,1150,1150,1100,1900,1800,1800,1800,1800,1800,1800,1750,1600,1500,1500,1500,1500,1500,1500,1450,1250,1150]'), ('Verbrauch','Sommer','Fabrik-Dauerbetrieb','[1350,1350,1350,1350,1350,1400,1450,1450,1450,1400,1400,1400,1600,1600,1600,1600,1600,1600,1400,1400,1400,1400,1400,1400]'), ('Verbrauch','Herbst','Fabrik-2-Schicht','[400,400,400,400,400,400,1200,1500,1700,1800,1900,1900,1900,1900,1500,1600,1700,1700,1600,1500,1400,1300,400,400]'), ('Verbrauch','Herbst','Fabrik-3-Schicht','[1150,1050,1050,1050,1050,1000,1700,1600,1600,1600,1600,1600,1600,1550,1400,1300,1300,1300,1300,1300,1300,1250,1150,1050]'), ('Verbrauch','Herbst','Fabrik-Dauerbetrieb','[1200,1200,1200,1200,1200,1250,1300,1300,1300,1250,1250,1250,1350,1350,1350,1350,1250,1250,1250,1250,1250,1250,1250,1250]'), ('Verbrauch','Winter','Fabrik-2-Schicht','[500,500,500,500,500,500,1200,1500,1700,1800,1900,2200,2200,2200,1800,1900,2000,2000,1900,1800,1700,1600,500,500]'), ('Verbrauch','Winter','Fabrik-3-Schicht','[1300,1200,1200,1200,1200,1150,2000,1900,1900,1900,1900,1900,1900,1850,1700,1600,1600,1600,1600,1600,1600,1550,1300,1200]'), ('Verbrauch','Winter','Fabrik-Dauerbetrieb','[1450,1450,1450,1450,1450,1700,1750,1750,1750,1500,1500,1500,1500,1500,1500,1500,1500,1700,1700,1700,1700,1500,1500,1500]');",
+        "payload": "",
+        "payloadType": "date",
+        "x": 220,
+        "y": 1980,
+        "wires": [
+            [
+                "619775f723e134f8"
+            ]
+        ]
+    },
+    {
+        "id": "619775f723e134f8",
+        "type": "sqlite",
+        "z": "eccf2d53df5f40e0",
+        "mydb": "f2f24f247aa43f9b",
+        "sqlquery": "batch",
+        "sql": "",
+        "name": "Batch",
+        "x": 470,
+        "y": 1980,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "27401d1ff0e2acec",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "function 4",
+        "func": "// Function “Build Season-Specific Presets Query (msg.topic only)”\nconst { init, type, season } = msg.payload;\n\n// 1) Nur auf Init reagieren\nif (!init) {\n  return null;\n}\n\n// 2) Validierung\nif (typeof type !== 'string' || !type || typeof season !== 'string' || !season) {\n  node.error(`Ungültiger type oder season: type=${type}, season=${season}`);\n  return null;\n}\n\n// 3) SQL komplett in msg.topic (Achtung: einfache String-Escapes für Quotes)\nmsg.topic = `\n  SELECT name, data\n    FROM presets\n   WHERE type   = '${type.replace(/'/g, \"''\")}'\n     AND season = '${season.replace(/'/g, \"''\")}'\n   ORDER BY name;\n`;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 1400,
+        "wires": [
+            [
+                "c26239383937a22d"
+            ]
+        ]
+    },
+    {
+        "id": "c26239383937a22d",
+        "type": "sqlite",
+        "z": "eccf2d53df5f40e0",
+        "mydb": "f2f24f247aa43f9b",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 830,
+        "y": 1400,
+        "wires": [
+            [
+                "a9573c589baed1e5",
+                "329fd30a1d79e12b"
+            ]
+        ]
+    },
+    {
+        "id": "a9573c589baed1e5",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "function 5",
+        "func": "// Function \"Basic Parse Presets\"\nconst rows = Array.isArray(msg.payload) ? msg.payload : [];\nconst presets = {};\nrows.forEach(r => {\n  try {\n    presets[r.name] = JSON.parse(r.data);\n  } catch (e) {\n    node.warn(`Invalid JSON for preset ${r.name}: ${e}`);\n  }\n});\nmsg.payload = { presets };\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 1400,
+        "wires": [
+            [
+                "836c1dec0a8994a9",
+                "ea976c17879d460a"
+            ]
+        ]
+    },
+    {
+        "id": "836c1dec0a8994a9",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 16",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 1340,
+        "wires": []
+    },
+    {
+        "id": "329fd30a1d79e12b",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 17",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 980,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "52885901cca1e2e4",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "Netto Pro ID",
+        "func": "// Netto-Chart (Erzeugung − Verbrauch) als Multi-Series in EINER Nachricht\n// ui_chart: Series = key:'series', X = key:'x', Y = key:'y', X-Axis = Linear\n\nconst all = flow.get('sliderArrays') || {};\nconst ids = Object.keys(all).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);\n\nconst zero24 = () => Array(24).fill(0);\n\nconst sumNet = Array(24).fill(0);\nconst points = [];\n\n// Netto je ID: Erzeugung - Verbrauch\nids.forEach(id => {\n  const gen  = (all[id] && Array.isArray(all[id]['Erzeugung']) && all[id]['Erzeugung'].length === 24) ? all[id]['Erzeugung']  : zero24();\n  const cons = (all[id] && Array.isArray(all[id]['Verbrauch']) && all[id]['Verbrauch'].length === 24) ? all[id]['Verbrauch'] : zero24();\n\n  let anyNonZero = false;\n  const net = Array(24);\n  for (let h = 0; h < 24; h++) {\n    const v = (Number(gen[h]) || 0) - (Number(cons[h]) || 0);\n    net[h] = v;\n    sumNet[h] += v;\n    if (v !== 0) anyNonZero = true;\n  }\n\n  if (anyNonZero) {\n    for (let h = 0; h < 24; h++) {\n      points.push({ series: `ID ${id} Netto`, x: h, y: net[h] });\n    }\n  }\n});\n\n// Summe Netto zuerst hinzufügen\nfor (let h = 0; h < 24; h++) {\n  points.unshift({ series: 'Summe Netto', x: 23 - h, y: sumNet[23 - h] });\n}\n\nmsg.payload = points;\n\nmsg.ui_control = {\n  options: {\n    parsing: { xAxisKey: 'x', yAxisKey: 'y' },\n    scales: {\n      x: {\n        type: 'linear',\n        min: 0, max: 23,\n        title: { display: true, text: 'Stunde' },\n        ticks: { stepSize: 1 }\n      },\n      y: {\n        beginAtZero: false, // Netto kann negativ sein\n        title: { display: true, text: 'Netto (Erzeugung − Verbrauch)' }\n      }\n    },\n    plugins: { legend: { display: true } }\n  }\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 1580,
+        "wires": [
+            [
+                "447c7b4e02403d60",
+                "54c49e10b5722e96",
+                "ff125cfcbf7ac30a"
+            ]
+        ]
+    },
+    {
+        "id": "447c7b4e02403d60",
+        "type": "ui-chart",
+        "z": "eccf2d53df5f40e0",
+        "group": "1b28ba4362c0e521",
+        "name": "Netto pro ID",
+        "label": "Netto Erzeugung-Verbrauch",
+        "order": 6,
+        "chartType": "line",
+        "category": "series",
+        "categoryType": "property",
+        "xAxisLabel": "Stunden",
+        "xAxisProperty": "x",
+        "xAxisPropertyType": "property",
+        "xAxisType": "linear",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "",
+        "yAxisProperty": "y",
+        "yAxisPropertyType": "property",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "replace",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "24",
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "8",
+        "height": "8",
+        "className": "",
+        "interpolation": "bezier",
+        "x": 930,
+        "y": 1620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "48b50ec5867e49c3",
+        "type": "ui-button",
+        "z": "eccf2d53df5f40e0",
+        "group": "393cd82ac3f9e3f9",
+        "name": "Start Cycle",
+        "label": "Start Cycle",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "{\"mac\":\"FF:FF:FF:FF:FF:FF\",\"cmd\":\"start_cycle\"}",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 170,
+        "y": 1080,
+        "wires": [
+            [
+                "ade5913c845fb976",
+                "12e52e7206200434"
+            ]
+        ]
+    },
+    {
+        "id": "bd0c17b41daa5371",
+        "type": "ui-chart",
+        "z": "eccf2d53df5f40e0",
+        "group": "bb3c3d3f30d954da",
+        "name": "Summe der Art",
+        "label": "Summe der Arten",
+        "order": 2,
+        "chartType": "line",
+        "category": "series",
+        "categoryType": "property",
+        "xAxisLabel": "Stunden",
+        "xAxisProperty": "x",
+        "xAxisPropertyType": "property",
+        "xAxisType": "linear",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "",
+        "yAxisProperty": "y",
+        "yAxisPropertyType": "property",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "replace",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "24",
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "8",
+        "height": "8",
+        "className": "",
+        "interpolation": "cubic",
+        "x": 940,
+        "y": 1580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ff125cfcbf7ac30a",
+        "type": "ui-chart",
+        "z": "eccf2d53df5f40e0",
+        "group": "bb3c3d3f30d954da",
+        "name": "Netto pro ID",
+        "label": "Netto Erzeugung-Verbrauch",
+        "order": 3,
+        "chartType": "line",
+        "category": "series",
+        "categoryType": "property",
+        "xAxisLabel": "Stunden",
+        "xAxisProperty": "x",
+        "xAxisPropertyType": "property",
+        "xAxisType": "linear",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "",
+        "yAxisProperty": "y",
+        "yAxisPropertyType": "property",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "replace",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "24",
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "8",
+        "height": "8",
+        "className": "",
+        "interpolation": "bezier",
+        "x": 930,
+        "y": 1660,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2fddb57250ae83a6",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"grid\":{\"x\":-30,\"y\":-20},\"name\":\"PV-Anlage\",\"icon\":\"/user-icons/factory-red.svg\",\"layer\":\"Erzeuger\",\"popup\":\"PV-Anlage\",\"iconSize\":50}",
+        "payloadType": "json",
+        "x": 650,
+        "y": 800,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "945878801b13c6f0",
+        "type": "worldmap",
+        "z": "eccf2d53df5f40e0",
+        "name": "Leipzig",
+        "lat": "51.336466",
+        "lon": "12.375255",
+        "zoom": "11",
+        "layer": "OSMC",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "show",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "false",
+        "coords": "deg",
+        "showgrid": "false",
+        "showruler": "false",
+        "allowFileDrop": "true",
+        "path": "/worldmap",
+        "overlist": "DR,CO,RA,DN",
+        "maplist": "OSMG,OSMC,EsriC,EsriS,UKOS",
+        "mapname": "",
+        "mapurl": "",
+        "mapopt": "",
+        "mapwms": false,
+        "x": 1060,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "9516d69f94d4a4e8",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 18",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1060,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "0e5561e832e990aa",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "function 2",
+        "func": "// Beispiel-Parameter (anpassen!)\nconst grid = {\n  lat0: 51.333105,      // Ursprung Breitengrad\n  lon0: 12.366167,      // Ursprung Längengrad\n  metersPerUnit: 100,   // 1 Grid-Einheit = 100 m\n  rotDeg: 0             // Drehung in Grad (0 = x nach Osten, y nach Norden)\n};\nflow.set('grid', grid);\nnode.status({fill:'green',shape:'dot',text:'Grid params gesetzt'});\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 860,
+        "wires": [
+            [
+                "945878801b13c6f0"
+            ]
+        ]
+    },
+    {
+        "id": "604860fcd0e4117b",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 640,
+        "y": 860,
+        "wires": [
+            [
+                "0e5561e832e990aa"
+            ]
+        ]
+    },
+    {
+        "id": "e1a06b8521845d99",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "Update WorldMap",
+        "func": "// === Worldmap: tableMap -> Marker (Name = Modulname + ID), Icons, sauberes Umbenennen ===\nconst USE_AUTO_GRID = true; // false = grid muss existieren\n\n// --- Grid laden/ggf. setzen ---\nlet grid = flow.get('grid');\nif (!grid) {\n  if (!USE_AUTO_GRID) { node.error('flow.grid nicht gesetzt'); return null; }\n  grid = { lat0: 51.333105, lon0: 12.366167, metersPerUnit: 100, rotDeg: 0 };\n  flow.set('grid', grid);\n}\nconst { lat0, lon0, metersPerUnit, rotDeg } = grid;\nconst theta = (Number(rotDeg) || 0) * Math.PI / 180;\n\n// --- Daten laden ---\nconst tableMap = flow.get('tableMap') || {};\nconst ids = Object.keys(tableMap).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);\n\n// --- Modulnamen & Icon-Zuordnung ---\nconst MODULES = {\n  0:'Master', 1:'Solar', 2:'Wind', 3:'Wasserkraft', 4:'Elektrolyseur',\n  5:'Batterie', 6:'Wasserstoff', 7:'Pumpspeicher', 8:'Haus', 9:'Fabrik', 10:'Auto', 11:'Umspannwerk'\n};\nfunction iconForModule(m){\n  switch (Number(m)) {\n    case 1:  return \"/user-icons/solar-panels-green.svg\";\n    case 2:  return \"/user-icons/wind-turbin-green.svg\";\n    case 3:  return \"/user-icons/hydro-power.svg\"\n    case 4:  return \"/user-icons/elektrolyseur.svg\"\n    case 5:  return \"/user-icons/battery.svg\"\n    case 6:  return \"/user-icons/wasserstoff.svg\"\n    case 7:  return \"/user-icons/reservoir-blau.svg\";\n    case 8:  return \"/user-icons/home-red.svg\";\n    case 9:  return \"/user-icons/factory-red.svg\";\n    case 10: return \"/user-icons/car-red.svg\";\n    default: return \"/user-icons/default.svg\"; // Fallback\n  }\n}\nfunction layerForModule(m){\n  switch (Number(m)) {\n    case 1: case 2: case 3:  case 4: return 'Erzeuger';\n    case 5: case 6: case 7:  return 'Speicher';\n    case 8: case 9: case 10: return 'Verbraucher';\n    default:                  return 'Erzeuger';\n  }\n}\nfunction gridToLatLon(x, y){\n  const ex = Number(x) * Number(metersPerUnit || 1);\n  const ny = Number(y) * Number(metersPerUnit || 1);\n  const east  = ex * Math.cos(theta) - ny * Math.sin(theta);\n  const north = ex * Math.sin(theta) + ny * Math.cos(theta);\n  const degLatPerM = 1/111320;\n  const degLonPerM = 1/(111320 * Math.cos((Number(lat0)||0)*Math.PI/180));\n  return { lat: Number(lat0) + north*degLatPerM, lon: Number(lon0) + east*degLonPerM };\n}\n\n// --- Letzten gesendeten Marker-Zustand STABIL PRO ID merken ---\nconst lastMetaById = flow.get('worldmap_lastMetaById') || {}; // { [id]: { name, layer } }\n\nlet sent = 0;\nfor (const id of ids) {\n  const e = tableMap[id];\n  if (!e) continue;\n\n  const mcode = Number(e.module);\n  const mname = MODULES[mcode] || `Modul ${mcode}`;\n  const newName  = `${mname} ${id}`;          // gewünschter Anzeigename\n  const newLayer = layerForModule(mcode);\n\n  const prev = lastMetaById[id];              // <- stabil pro ID\n  const nameChanged  = !prev || prev.name  !== newName;\n  const layerChanged = !prev || prev.layer !== newLayer;\n\n  // alten Marker löschen, wenn Name oder Layer sich ändern\n  if (prev && (nameChanged || layerChanged)) {\n    node.send({ payload: { name: prev.name, layer: prev.layer, deleted: true } });\n  }\n\n  // neuen/aktualisierten Marker senden\n  const { lat, lon } = gridToLatLon(e.x || 0, e.y || 0);\n  const popup = `${mname} (ID ${id})<br>MAC: ${e.mac || '-'}`;\n\n  node.send({\n    payload: {\n      name: newName,\n      lat, lon,\n      layer: newLayer,\n      popup,\n      icon: iconForModule(mcode),\n      iconSize: 45 // ggf. anpassen/je Modul variieren\n      // ttl: 60 // optional: Marker verfällt nach 60s\n    }\n  });\n\n  // Zustand aktualisieren\n  lastMetaById[id] = { name: newName, layer: newLayer };\n  sent++;\n}\n\n// speichern & Status\nflow.set('worldmap_lastMetaById', lastMetaById);\nnode.status({ fill: sent ? 'green' : 'grey', shape: 'dot', text: sent ? `Worldmap: ${sent} Update(s)` : 'Worldmap: keine Änderungen' });\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 830,
+        "y": 800,
+        "wires": [
+            [
+                "945878801b13c6f0",
+                "9516d69f94d4a4e8"
+            ]
+        ]
+    },
+    {
+        "id": "31f82c92199113eb",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "function 7",
+        "func": "// Init-Function (vor ui_template-Node ausführen)\n\nconst tableMap      = flow.get('tableMap')      || {};\nconst allArrays     = flow.get('sliderArrays')  || {};\nconst lastKey       = flow.get('lastInitKey')   || '';\nconst lastSelId     = flow.get('lastSelectedId');\nconst lastPresetMap = flow.get('lastPresetMap') || {}; \n// { [id]: { [type]: { preset, season, ts } } }\n\nconst MODULES = {\n  0: 'Master',\n  1: 'Solar',\n  2: 'Wind',\n  3: 'Wasserkraft',\n  4: 'Elektrolyseur',\n  5: 'Batterie',\n  6: 'Wasserstoff',\n  7: 'Pumpspeicher',\n  8: 'Haus',\n  9: 'Fabrik',\n  10: 'Auto',\n  11: 'Umspannwerk'\n};\n\nfunction getAvailableIds(map) {\n  return Object.keys(map)\n    .map(k => Number(k))\n    .filter(n => Number.isFinite(n))\n    .sort((a,b) => a - b);\n}\n\nfunction pickMostRecentId(map, ids) {\n  if (!ids.length) return null;\n  return ids.slice().sort((a,b) => {\n    const tb = (map[b]?.timestamp || 0);\n    const ta = (map[a]?.timestamp || 0);\n    return tb - ta; // neueste zuerst\n  })[0];\n}\n\nif (msg.payload && msg.payload.init === true) {\n  const availableIds = getAvailableIds(tableMap);\n\n  // ID bestimmen (Prio: msg → lastSel → mostRecent)\n  const reqId = Number(msg.payload.id);\n  let id = Number.isFinite(reqId) ? reqId \n        : Number.isFinite(Number(lastSelId)) ? Number(lastSelId) \n        : pickMostRecentId(tableMap, availableIds);\n\n  const reqType   = (typeof msg.payload.type === 'string' && msg.payload.type)   || 'Verbrauch';\n  const reqSeason = (typeof msg.payload.season === 'string' && msg.payload.season) || 'Frühling';\n\n  // Zuletzt genutztes Preset/Season für ID+Type (falls vorhanden)\n  const remembered     = (Number.isFinite(id) && lastPresetMap[id] && lastPresetMap[id][reqType]) ? lastPresetMap[id][reqType] : null;\n  const selectedPreset = remembered?.preset || 'Custom';\n  const selectedSeason = remembered?.season || reqSeason;\n\n  // 24er-Array laden (oder Nullen)\n  let arr = Array(24).fill(0);\n  if (Number.isFinite(id) &&\n      allArrays[id] &&\n      Array.isArray(allArrays[id][reqType]) &&\n      allArrays[id][reqType].length === 24) {\n    arr = allArrays[id][reqType];\n  }\n\n  // last keys/ids aktualisieren\n  if (Number.isFinite(id)) {\n    const thisKey = `${id}-${reqType}`;\n    if (thisKey !== lastKey) {\n      flow.set('lastInitKey', thisKey);\n      flow.set('lastSelectedId', id);\n    }\n  }\n\n  // Modul-Daten aus tableMap lesen\n  let moduleCode = null;\n  if (Number.isFinite(id) && tableMap[id] && Number.isFinite(Number(tableMap[id].module))) {\n    moduleCode = Number(tableMap[id].module);\n  }\n  const moduleName = (moduleCode != null && MODULES.hasOwnProperty(moduleCode))\n    ? MODULES[moduleCode]\n    : (moduleCode == null ? null : `Modul ${moduleCode}`);\n\n  // Antwort an UI – inkl. Modul\n  msg.payload = {\n    sliderValues:        arr,\n    availableIds:        availableIds,\n    selectedId:          Number.isFinite(id) ? id : null,\n    selectedType:        reqType,\n    selectedSeason:      selectedSeason,\n    selectedPreset:      selectedPreset,\n    selectedModuleCode:  moduleCode,\n    selectedModuleName:  moduleName\n  };\n\n  node.status({\n    fill: \"green\",\n    shape: \"dot\",\n    text: `Init id=${id ?? 'none'} type=${reqType} modul=${moduleName ?? '-'}`\n  });\n\n  return msg;\n}\n\n// Falsche Init-Requests nur warnen\nif (msg.payload && msg.payload.init) {\n  node.warn(`Init request malformed: ${JSON.stringify(msg.payload)}`);\n}\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 220,
+        "y": 600,
+        "wires": [
+            [
+                "e0664c4f2841a5da",
+                "7a2fa7111157c6a5"
+            ]
+        ]
+    },
+    {
+        "id": "7a2fa7111157c6a5",
+        "type": "ui-form",
+        "z": "eccf2d53df5f40e0",
+        "name": "Test form",
+        "group": "393cd82ac3f9e3f9",
+        "label": "command form",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "Command",
+                "key": "cmd",
+                "type": "dropdown",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "Mac-Adresse",
+                "key": "mac",
+                "type": "text",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "Mode",
+                "key": "mode",
+                "type": "dropdown",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "ID",
+                "key": "id",
+                "type": "text",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "Timestamp",
+                "key": "timestamp",
+                "type": "number",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "Modul Typ",
+                "key": "module",
+                "type": "dropdown",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "Verbrauch",
+                "key": "consumption",
+                "type": "number",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "Erzeugung",
+                "key": "generation",
+                "type": "number",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "Speicher",
+                "key": "storage",
+                "type": "number",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "X-Koordinate",
+                "key": "x",
+                "type": "number",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "Y-Koordinate",
+                "key": "y",
+                "type": "number",
+                "required": false,
+                "rows": null
+            },
+            {
+                "label": "ERROR",
+                "key": "error",
+                "type": "number",
+                "required": false,
+                "rows": null
+            }
+        ],
+        "formValue": {
+            "cmd": "",
+            "mac": "",
+            "mode": "",
+            "id": "",
+            "timestamp": "",
+            "module": "",
+            "consumption": "",
+            "generation": "",
+            "storage": "",
+            "x": "",
+            "y": "",
+            "error": ""
+        },
+        "payload": "",
+        "submit": "submit",
+        "cancel": "clear",
+        "resetOnSubmit": false,
+        "topic": "topic",
+        "topicType": "msg",
+        "splitLayout": true,
+        "className": "",
+        "passthru": false,
+        "dropdownOptions": [
+            {
+                "dropdown": "cmd",
+                "value": "set_mode",
+                "label": "set_mode"
+            },
+            {
+                "dropdown": "cmd",
+                "value": "request_status",
+                "label": "request_status"
+            },
+            {
+                "dropdown": "cmd",
+                "value": "set_status",
+                "label": "set_status"
+            },
+            {
+                "dropdown": "mode",
+                "value": "0",
+                "label": "MODE_WAIT_FOR_REGISTRY"
+            },
+            {
+                "dropdown": "mode",
+                "value": "1",
+                "label": "MODE_AUTOMATIK"
+            },
+            {
+                "dropdown": "mode",
+                "value": "2",
+                "label": "MODE_TAGESZYKLUS"
+            },
+            {
+                "dropdown": "mode",
+                "value": "3",
+                "label": "MODE_NACHTZYKLUS"
+            },
+            {
+                "dropdown": "mode",
+                "value": "4",
+                "label": "MODE_TAGNACHTZYKLUS"
+            },
+            {
+                "dropdown": "mode",
+                "value": "5",
+                "label": "MODE_INTERAKTIV"
+            },
+            {
+                "dropdown": "mode",
+                "value": "6",
+                "label": "MODE_PAUSE"
+            },
+            {
+                "dropdown": "cmd",
+                "value": "modify_mode",
+                "label": "modify_mode"
+            },
+            {
+                "dropdown": "cmd",
+                "value": "leave_network",
+                "label": "leave_network"
+            },
+            {
+                "dropdown": "cmd",
+                "value": "shutdown_single",
+                "label": "shutdown_single"
+            },
+            {
+                "dropdown": "cmd",
+                "value": "shutdown_all",
+                "label": "shutdown_all"
+            },
+            {
+                "dropdown": "cmd",
+                "value": "start_all",
+                "label": "start_all"
+            },
+            {
+                "dropdown": "cmd",
+                "value": "start_single",
+                "label": "start_single"
+            },
+            {
+                "dropdown": "cmd",
+                "value": "random_cord",
+                "label": "random_cord"
+            },
+            {
+                "dropdown": "module",
+                "value": "1",
+                "label": "Solar"
+            },
+            {
+                "dropdown": "module",
+                "value": "2",
+                "label": "Windkraftanlage"
+            },
+            {
+                "dropdown": "module",
+                "value": "3",
+                "label": "Wasserkraft"
+            },
+            {
+                "dropdown": "module",
+                "value": "4",
+                "label": "Elektrolyseur"
+            },
+            {
+                "dropdown": "module",
+                "value": "5",
+                "label": "Akku"
+            },
+            {
+                "dropdown": "module",
+                "value": "6",
+                "label": "Wasserstoffspeicher"
+            },
+            {
+                "dropdown": "module",
+                "value": "7",
+                "label": "Pumpspeicher"
+            },
+            {
+                "dropdown": "module",
+                "value": "8",
+                "label": "Haus"
+            },
+            {
+                "dropdown": "module",
+                "value": "9",
+                "label": "Fabrik"
+            },
+            {
+                "dropdown": "module",
+                "value": "10",
+                "label": "Auto"
+            },
+            {
+                "dropdown": "module",
+                "value": "11",
+                "label": "Umspannwerk"
+            }
+        ],
+        "x": 380,
+        "y": 600,
+        "wires": [
+            [
+                "033e6ef60f464a90",
+                "4666fb37230f05f0",
+                "d1c50d387f485bf3"
+            ]
+        ]
+    },
+    {
+        "id": "caa010a7ea2c3118",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 19",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "d1c50d387f485bf3",
+        "type": "debug",
+        "z": "eccf2d53df5f40e0",
+        "name": "debug 20",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 560,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "3afce7140f3f2cb2",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "function 3",
+        "func": "const p = msg.payload || {};\nif (!p.grid) { node.warn('payload.grid fehlt'); return null; }\n\nconst { x, y } = p.grid;\nconst grid = flow.get('grid');\nif (!grid) { node.error('Grid-Parameter nicht gesetzt'); return null; }\n\nconst { lat0, lon0, metersPerUnit, rotDeg } = grid;\n\n// 1) Grid (x,y) -> lokale Meter (east,north) mit Rotation\nconst theta = (rotDeg || 0) * Math.PI / 180;\nconst ex = x * metersPerUnit;\nconst ny = y * metersPerUnit;\nconst east = ex * Math.cos(theta) - ny * Math.sin(theta);\nconst north = ex * Math.sin(theta) + ny * Math.cos(theta);\n\n// 2) Meter -> Grad (nahe an lat0)\nconst degLatPerM = 1 / 111320; // ~ Meter pro Breitengrad\nconst degLonPerM = 1 / (111320 * Math.cos(lat0 * Math.PI / 180));\n\nconst lat = lat0 + north * degLatPerM;\nconst lon = lon0 + east * degLonPerM;\n\n// 3) Worldmap-Message bauen\nmsg.payload = {\n    name: p.name || `Objekt (${x},${y})`,\n    lat, lon,\n    icon: p.icon || \"circle\",\n    layer: p.layer || \"Default\",\n    popup: p.popup || `Grid (${x},${y})`\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4666fb37230f05f0",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "Send Request",
+        "func": "// ---- Sende-Function: ID/Module per MAC aus tableMap nachtragen + random_cord + optionales Follow-up ----\n\nconst FOLLOWUP_DELAY_MS = 1000;  // 1s für request_status nach set_status\nconst BROADCAST_MAC = \"FF:FF:FF:FF:FF:FF\";\nconst DEFAULT_DELAY_MS = 250;\n\n// Hilfsfunktionen\nfunction isEmpty(v) {\n  return v === undefined || v === null || (typeof v === \"string\" && v.trim() === \"\");\n}\nfunction normMac(m) {\n  return String(m || \"\").trim().toUpperCase();\n}\nfunction pickByMac(macU, preferId) {\n  const tableMap = flow.get(\"tableMap\") || {};\n  const list = Object.keys(tableMap).map(k => tableMap[k])\n    .filter(e => e && normMac(e.mac) === macU);\n  if (!list.length) return null;\n\n  // wenn ID bekannt, diese bevorzugen\n  if (!isEmpty(preferId)) {\n    const exact = list.find(e => String(e.id) === String(preferId));\n    if (exact) return exact;\n  }\n\n  // sonst \"aktuellsten\": höchster timestamp, dann kleinste ID\n  list.sort((a, b) => {\n    const tb = Number(b.timestamp) || 0;\n    const ta = Number(a.timestamp) || 0;\n    if (tb !== ta) return tb - ta;\n    const ib = Number(b.id), ia = Number(a.id);\n    if (Number.isFinite(ia) && Number.isFinite(ib)) return ia - ib;\n    return 0;\n  });\n  return list[0];\n}\nfunction randIntIncl(min, max) {\n  min = Math.ceil(min); max = Math.floor(max);\n  return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// 0) Payload robust machen (String -> Objekt)\nif (typeof msg.payload === \"string\") {\n  try { msg.payload = JSON.parse(msg.payload); }\n  catch (e) { node.warn(\"Payload ist kein valider JSON-String – leite unverändert weiter.\"); }\n}\nif (typeof msg.payload !== \"object\" || msg.payload === null) {\n  node.send(msg);\n  return;\n}\n\n// 1) Command bestimmen\nconst cmd = String(msg.payload.cmd || \"\").trim().toLowerCase();\n\n// === A) random_cord: sequenziell Zufallswerte senden, mit ID/module aus tableMap ===\nif (cmd === \"random_cord\") {\n  const tableMap = flow.get(\"tableMap\") || {};\n  const delayMs = Number.isFinite(Number(msg.payload.delayMs)) ? Number(msg.payload.delayMs) : DEFAULT_DELAY_MS;\n\n  const reqMacU = normMac(msg.payload.mac);\n  let targets = [];\n\n  if (reqMacU === BROADCAST_MAC) {\n    // alle MACs aus tableMap einsammeln\n    const macSet = {};\n    for (const k of Object.keys(tableMap)) {\n      const m = normMac(tableMap[k]?.mac);\n      if (m) macSet[m] = true;\n    }\n    targets = Object.keys(macSet);\n    if (!targets.length) {\n      node.status({ fill: \"yellow\", shape: \"ring\", text: \"random_cord: keine MACs in tableMap\" });\n      return;\n    }\n  } else {\n    if (!reqMacU) {\n      node.status({ fill: \"yellow\", shape: \"ring\", text: \"random_cord: keine MAC angegeben\" });\n      return;\n    }\n    targets = [reqMacU];\n  }\n\n  let i = 0;\n  const total = targets.length;\n\n  function sendNext() {\n    if (i >= total) {\n      node.status({ fill: \"green\", shape: \"dot\", text: `random_cord: ${total} gesendet` });\n      return;\n    }\n\n    const macU = targets[i++];\n    const picked = pickByMac(macU, msg.payload.id);\n\n    if (!picked) {\n      node.warn(`random_cord: MAC nicht in tableMap gefunden: ${macU}`);\n      return setTimeout(sendNext, delayMs);\n    }\n\n    const rx = randIntIncl(-90, 90);\n    const ry = randIntIncl(-90, 90);\n\n    const out = {\n      payload: {\n        mac: macU,\n        id: picked.id,        // vorhandene ID übernehmen (0 bleibt 0)\n        timestamp: null,\n        module: picked.module,    // vorhandenes module übernehmen\n        consumption: null,\n        generation: null,\n        storage: null,\n        x: rx,\n        y: ry,\n        error: null,\n        cmd: \"set_status\",\n        mode: \"\"\n      }\n    };\n\n    node.send(out);\n    node.status({ fill: \"blue\", shape: \"dot\", text: `random_cord: ${macU} -> x:${rx} y:${ry}` });\n\n    setTimeout(sendNext, delayMs);\n  }\n\n  // Start der Sequenz\n  sendNext();\n  return; // random_cord original NICHT durchreichen\n}\n\n// === B) andere Kommandos (außer request_status): ID/module ggf. aus tableMap ergänzen ===\nif (cmd !== \"request_status\") {\n  const macU = normMac(msg.payload.mac);\n  const idEmpty = isEmpty(msg.payload.id);\n  const moduleEmpty = isEmpty(msg.payload.module);\n\n  if (macU && (idEmpty || moduleEmpty)) {\n    const pick = pickByMac(macU, msg.payload.id);\n    if (pick) {\n      if (idEmpty) msg.payload.id = pick.id;\n      if (moduleEmpty) msg.payload.module = pick.module;\n      msg.payload.mac = macU; // normalisiert\n      node.status({ fill: \"blue\", shape: \"dot\", text: `ergänzt: id=${msg.payload.id}, module=${msg.payload.module}` });\n    } else {\n      node.status({ fill: \"yellow\", shape: \"ring\", text: \"MAC nicht in tableMap gefunden – keine Ergänzung\" });\n    }\n  }\n}\n\n// 2) Original (ggf. angereichert) SOFORT weiterleiten\nnode.send(msg);\n\n// 3) Optionales Follow-up: bei set_status -> nach 1s request_status mit gleicher mac & id\nif (cmd === \"set_status\") {\n  const mac2 = normMac(msg.payload.mac);\n  const id2 = isEmpty(msg.payload.id) ? \"\" : String(msg.payload.id);\n\n  const delayedMsg = {\n    payload: {\n      mac: mac2,\n      id: id2,\n      timestamp: null,\n      module: \"\",  // bewusst leer gelassen (falls du es auch hier willst, sag Bescheid)\n      consumption: null,\n      generation: null,\n      storage: null,\n      x: null,\n      y: null,\n      error: null,\n      cmd: \"request_status\",\n      mode: \"\"\n    }\n  };\n\n  node.status({ fill: \"green\", shape: \"dot\", text: \"set_status -> request_status in 1s\" });\n  setTimeout(() => {\n    try {\n      node.send(delayedMsg);\n      node.status({ fill: \"green\", shape: \"dot\", text: \"request_status gesendet\" });\n    } catch (err) {\n      node.error(\"Fehler beim Senden der request_status: \" + err.message, delayedMsg);\n    }\n  }, FOLLOWUP_DELAY_MS);\n}\n\nreturn;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 640,
+        "wires": [
+            [
+                "3322b85b1d9eec4e",
+                "caa010a7ea2c3118"
+            ]
+        ]
+    },
+    {
+        "id": "c7098274d297814c",
+        "type": "ui-button",
+        "z": "eccf2d53df5f40e0",
+        "group": "393cd82ac3f9e3f9",
+        "name": "Request Status",
+        "label": "Request Status",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "{\"mac\":\"FF:FF:FF:FF:FF:FF\",\"cmd\":\"request_status\"}",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 180,
+        "y": 1140,
+        "wires": [
+            [
+                "ade5913c845fb976"
+            ]
+        ]
+    },
+    {
+        "id": "7ed270b4403821d6",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "g": "2966d2efc88ef368",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 2140,
+        "wires": [
+            [
+                "3b4a991d402a1b14"
+            ]
+        ]
+    },
+    {
+        "id": "a0b3ba6d2ff54371",
+        "type": "ui-table",
+        "z": "eccf2d53df5f40e0",
+        "group": "bad1f384ef16bad5",
+        "name": "",
+        "label": "",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "maxrows": "10",
+        "passthru": false,
+        "autocols": true,
+        "showSearch": true,
+        "deselect": true,
+        "selectionType": "none",
+        "columns": [],
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "replace",
+        "x": 790,
+        "y": 2260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3b4a991d402a1b14",
+        "type": "file in",
+        "z": "eccf2d53df5f40e0",
+        "g": "2966d2efc88ef368",
+        "name": "",
+        "filename": "/home/pi/Documents/Wetter_daten_mit_energie.csv",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": true,
+        "x": 410,
+        "y": 2140,
+        "wires": [
+            [
+                "554481a25ab0579e"
+            ]
+        ]
+    },
+    {
+        "id": "dd0449c4608d0e66",
+        "type": "sqlite",
+        "z": "eccf2d53df5f40e0",
+        "g": "2966d2efc88ef368",
+        "mydb": "e2d455fdeb1bf241",
+        "sqlquery": "batch",
+        "sql": "INSERT OR REPLACE INTO Realdata (date, time, temp, wind, solar, solarPower, windPower, totalPower) VALUES ($date, $time, $temp, $wind, $solar, $solarPower, $windPower, $totalPower)",
+        "name": "RealDB",
+        "x": 900,
+        "y": 2140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "554481a25ab0579e",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "g": "2966d2efc88ef368",
+        "name": "CSV zu SQLite ",
+        "func": "let csvText = msg.payload;\n\nif (typeof csvText !== 'string' || csvText.trim() === \"\") return null;\n\nlet lines = csvText.split(\"\\n\");\nlet queries = []; \nfor (let i = 0; i < lines.length; i++) {\n    let line = lines[i].trim();\n    \n    // Ignoriere leere Zeilen und Header\n    if (!line || !line.startsWith(\"20\")) continue;\n\n    let columns = line.split(\",\");\n    \n    // Validierung\n    if (columns.length < 8) continue;\n\n    let timeParts = columns[0].split(\"T\");\n\n    let d = timeParts[0];\n    let t = timeParts[1];\n    let temp = parseFloat(columns[1]) || 0;\n    let wind = parseFloat(columns[2]) || 0;\n    let solar = parseFloat(columns[3]) || 0;\n    let solarP = parseInt(columns[4]) || 0;\n    let windP = parseInt(columns[6]) || 0;\n    let totalP = parseInt(columns[7]) || 0;\n\n    let sqlString = `INSERT OR REPLACE INTO Realdata (date, time, temp, wind, solar, solarPower, windPower, totalPower) VALUES ('${d}', '${t}', ${temp}, ${wind}, ${solar}, ${solarP}, ${windP}, ${totalP});`;\n\n    // Befehl zur Liste hinzufügen\n    queries.push(sqlString);\n}\n\nif (queries.length === 0) return null;\n\n\nlet megaString = queries.join(\"\\n\");\n\n\nmsg.topic = \"BEGIN TRANSACTION;\\n\" + megaString + \"\\nCOMMIT;\";\n\ndelete msg.payload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 2140,
+        "wires": [
+            [
+                "dd0449c4608d0e66"
+            ]
+        ]
+    },
+    {
+        "id": "87e3bf3019341438",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "SELECT * FROM Realdata;",
+        "payload": "",
+        "payloadType": "date",
+        "x": 440,
+        "y": 2260,
+        "wires": [
+            [
+                "94c6315d7483d5f4"
+            ]
+        ]
+    },
+    {
+        "id": "94c6315d7483d5f4",
+        "type": "sqlite",
+        "z": "eccf2d53df5f40e0",
+        "mydb": "e2d455fdeb1bf241",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 620,
+        "y": 2260,
+        "wires": [
+            [
+                "a0b3ba6d2ff54371"
+            ]
+        ]
+    },
+    {
+        "id": "f9d38e4303c29ce6",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "Clear",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "DELETE FROM Realdata;",
+        "payload": "",
+        "payloadType": "date",
+        "x": 470,
+        "y": 2220,
+        "wires": [
+            [
+                "94c6315d7483d5f4"
+            ]
+        ]
+    },
+    {
+        "id": "ed624acd0c5af322",
+        "type": "sqlite",
+        "z": "eccf2d53df5f40e0",
+        "mydb": "f2f24f247aa43f9b",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 470,
+        "y": 2040,
+        "wires": [
+            [
+                "0e4f32e95d94920c"
+            ]
+        ]
+    },
+    {
+        "id": "d57463f7e9222fe4",
+        "type": "ui-chart",
+        "z": "eccf2d53df5f40e0",
+        "g": "fa403590d0b575cc",
+        "group": "0529dacfd62778eb",
+        "name": "Wind-Energie",
+        "label": "Wind-Enegie",
+        "order": 2,
+        "chartType": "bar",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "Tag",
+        "xAxisProperty": "x",
+        "xAxisPropertyType": "property",
+        "xAxisType": "category",
+        "xAxisFormat": "DD.MM. HH:mm",
+        "xAxisFormatType": "custom",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "W",
+        "yAxisProperty": "y",
+        "yAxisPropertyType": "property",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "replace",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": false,
+        "removeOlder": "100000",
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "20",
+        "height": "8",
+        "className": "",
+        "interpolation": "linear",
+        "x": 1300,
+        "y": 2520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "55e7ca0c46ea6df1",
+        "type": "sqlite",
+        "z": "eccf2d53df5f40e0",
+        "g": "fa403590d0b575cc",
+        "mydb": "e2d455fdeb1bf241",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 880,
+        "y": 2460,
+        "wires": [
+            [
+                "a9f1219cb299e1b7",
+                "f3e6141ba9118dd4",
+                "0c538863b324fb13"
+            ]
+        ]
+    },
+    {
+        "id": "a9f1219cb299e1b7",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "g": "fa403590d0b575cc",
+        "name": "Windenergie Filter",
+        "func": "// Wir fügen oben das Wort \"index\" hinzu, damit der Code mitzählen kann\nmsg.payload = msg.payload.map((row, index) => {\n    \n    let dateParts = String(row.date).split(\"-\");\n    let day = dateParts[2];\n    let month = dateParts[1];\n    \n    let timeParts = String(row.time).split(\":\");\n    let hour = timeParts[0];\n    \n    // Standard-Text für alle normalen Balken\n    let label = day + \".\" + month + \". \" + hour + \" Uhr\";\n    \n    // HIGHLIGHT-TRICK: Wenn es exakt der mittlere Wert ist (Index 10)\n    if (index === 10) {\n        label = \"➡️ \" + label + \" ⬅️\"; // Fügt auffällige Pfeile hinzu\n    }\n    \n    return {\n        x: label,\n        y: row.windPower // (hier natürlich windPower, temp, etc. anpassen)\n    };\n});\n\nmsg.topic = \"Windenergie\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1090,
+        "y": 2520,
+        "wires": [
+            [
+                "d57463f7e9222fe4"
+            ]
+        ]
+    },
+    {
+        "id": "f3e6141ba9118dd4",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "g": "fa403590d0b575cc",
+        "name": "Wind Filter",
+        "func": "msg.payload = msg.payload.map((row, index) => {\n\n    let dateParts = String(row.date).split(\"-\");\n    let day = dateParts[2];\n    let month = dateParts[1];\n\n    let timeParts = String(row.time).split(\":\");\n    let hour = timeParts[0];\n\n    let label = day + \".\" + month + \". \" + hour + \" Uhr\";\n\n    \n    if (index === 10) {\n        label = \"➡️ \" + label + \" ⬅️\"; \n    }\n\n    return {\n        x: label,\n        y: row.wind\n    };\n});\n\nmsg.topic = \"Windenergie\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1070,
+        "y": 2460,
+        "wires": [
+            [
+                "d82d4a860dbc70dc"
+            ]
+        ]
+    },
+    {
+        "id": "0c538863b324fb13",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "g": "fa403590d0b575cc",
+        "name": "Solarenergie Filter",
+        "func": "// Wir fügen oben das Wort \"index\" hinzu, damit der Code mitzählen kann\nmsg.payload = msg.payload.map((row, index) => {\n    \n    let dateParts = String(row.date).split(\"-\");\n    let day = dateParts[2];\n    let month = dateParts[1];\n    \n    let timeParts = String(row.time).split(\":\");\n    let hour = timeParts[0];\n    \n    // Standard-Text für alle normalen Balken\n    let label = day + \".\" + month + \". \" + hour + \" Uhr\";\n    \n    // HIGHLIGHT-TRICK: Wenn es exakt der mittlere Wert ist (Index 10)\n    if (index === 10) {\n        label = \"➡️ \" + label + \" ⬅️\"; // Fügt auffällige Pfeile hinzu\n    }\n    \n    return {\n        x: label,\n        y: row.solarPower // (hier natürlich windPower, temp, etc. anpassen)\n    };\n});\n\nmsg.topic = \"Windenergie\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1090,
+        "y": 2580,
+        "wires": [
+            [
+                "31776acc3f7e1aeb"
+            ]
+        ]
+    },
+    {
+        "id": "d82d4a860dbc70dc",
+        "type": "ui-chart",
+        "z": "eccf2d53df5f40e0",
+        "g": "fa403590d0b575cc",
+        "group": "0529dacfd62778eb",
+        "name": "Windgeschwindigkeit",
+        "label": "Windgeschwindigkeit",
+        "order": 1,
+        "chartType": "bar",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "Tag",
+        "xAxisProperty": "x",
+        "xAxisPropertyType": "property",
+        "xAxisType": "category",
+        "xAxisFormat": "",
+        "xAxisFormatType": "d/L",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "km/h",
+        "yAxisProperty": "y",
+        "yAxisPropertyType": "property",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "replace",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": false,
+        "removeOlder": "21",
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "15",
+        "height": "8",
+        "className": "",
+        "interpolation": "linear",
+        "x": 1320,
+        "y": 2460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "31776acc3f7e1aeb",
+        "type": "ui-chart",
+        "z": "eccf2d53df5f40e0",
+        "g": "fa403590d0b575cc",
+        "group": "0529dacfd62778eb",
+        "name": "Solar-Energy",
+        "label": "Solar-Energy",
+        "order": 3,
+        "chartType": "bar",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "Tag",
+        "xAxisProperty": "x",
+        "xAxisPropertyType": "property",
+        "xAxisType": "category",
+        "xAxisFormat": "",
+        "xAxisFormatType": "d/L",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "W",
+        "yAxisProperty": "y",
+        "yAxisPropertyType": "property",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "replace",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": false,
+        "removeOlder": "21",
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "20",
+        "height": "8",
+        "className": "",
+        "interpolation": "linear",
+        "x": 1290,
+        "y": 2580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e275a0c38bf4c2f0",
+        "type": "controltimer",
+        "z": "eccf2d53df5f40e0",
+        "g": "701f4b41ab8799d9",
+        "name": "",
+        "timerType": "delay",
+        "timerDurationUnit": "second",
+        "timerDurationType": "num",
+        "timerDuration": 5,
+        "timerLoopTimeoutUnit": "second",
+        "timerLoopTimeoutType": "num",
+        "timerLoopTimeout": 0,
+        "loopTimeoutMessageType": "str",
+        "loopTimeoutMessage": "LOOP_TIMEOUT",
+        "timerMaxLoopIterationsType": "num",
+        "timerMaxLoopIterations": 0,
+        "loopMaxIterationsMessageType": "str",
+        "loopMaxIterationsMessage": "MAX_LOOP_ITERATIONS",
+        "isRunningTimerProgressVisible": true,
+        "outputReceivedMessageOnTimerTrigger": false,
+        "outputReceivedMessageOnTimerHalt": false,
+        "startTimerOnReceivalOfUnknownMessage": false,
+        "resetTimerOnReceivalOfUnknownMessage": false,
+        "resetTimerOnReceivalOfStartAction": false,
+        "continueTimerOnReceivalOfStartAction": false,
+        "isDebugModeEnabled": false,
+        "timerTriggeredMessageType": "str",
+        "timerTriggeredMessage": "TIMER_TRIGGERED",
+        "timerHaltedMessageType": "str",
+        "timerHaltedMessage": "TIMER_HALTED",
+        "isStartActionEnabled": true,
+        "isStopActionEnabled": true,
+        "isResetActionEnabled": true,
+        "isPauseActionEnabled": true,
+        "isContinueActionEnabled": true,
+        "actionPropertyNameType": "str",
+        "actionPropertyName": "payload",
+        "startActionNameType": "str",
+        "startActionName": "START",
+        "stopActionNameType": "str",
+        "stopActionName": "STOP",
+        "resetActionNameType": "str",
+        "resetActionName": "RESET",
+        "pauseActionNameType": "str",
+        "pauseActionName": "PAUSE",
+        "continueActionNameType": "str",
+        "continueActionName": "CONTINUE",
+        "x": 520,
+        "y": 2660,
+        "wires": [
+            [
+                "d1cc5151dcf8c87b",
+                "56dc86de1207a491"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "e91ced042df54ef9",
+        "type": "ui-button",
+        "z": "eccf2d53df5f40e0",
+        "g": "701f4b41ab8799d9",
+        "group": "3541b526476c04f2",
+        "name": "Start Timer",
+        "label": "Start Timer",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "timerDuration",
+        "payloadType": "flow",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 110,
+        "y": 2620,
+        "wires": [
+            [
+                "a235f2a7a62c2cae",
+                "43ad202f4fc8ec44"
+            ]
+        ]
+    },
+    {
+        "id": "a235f2a7a62c2cae",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "g": "701f4b41ab8799d9",
+        "name": "Create Start Timerpayload",
+        "func": "let timeduration = msg.payload;\n\nmsg.payload = \"START\";\nmsg.timerType = \"loop\";\nmsg.timerDuration = timeduration;\nmsg.timerDurationUnit = \"second\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 2640,
+        "wires": [
+            [
+                "e275a0c38bf4c2f0"
+            ]
+        ]
+    },
+    {
+        "id": "5bc99988a91ae173",
+        "type": "ui-number-input",
+        "z": "eccf2d53df5f40e0",
+        "g": "701f4b41ab8799d9",
+        "group": "3541b526476c04f2",
+        "name": "Timer Duration",
+        "label": "Timer Duration",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "topic": "",
+        "topicType": "str",
+        "min": 0,
+        "max": "20",
+        "step": 1,
+        "tooltip": "",
+        "passthru": true,
+        "sendOnBlur": false,
+        "sendOnEnter": false,
+        "className": "",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 120,
+        "y": 2560,
+        "wires": [
+            [
+                "aa1bde32cf9fccc1"
+            ]
+        ]
+    },
+    {
+        "id": "aa1bde32cf9fccc1",
+        "type": "change",
+        "z": "eccf2d53df5f40e0",
+        "g": "701f4b41ab8799d9",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "timerDuration",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg",
+                "dc": true
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 330,
+        "y": 2560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "afc1ec9c458a634b",
+        "type": "ui-button",
+        "z": "eccf2d53df5f40e0",
+        "g": "701f4b41ab8799d9",
+        "group": "3541b526476c04f2",
+        "name": "Stop Timer",
+        "label": "Stop Timer",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "timerDuration",
+        "payloadType": "flow",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 110,
+        "y": 2680,
+        "wires": [
+            [
+                "3074bcd44c80d0ce"
+            ]
+        ]
+    },
+    {
+        "id": "3074bcd44c80d0ce",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "g": "701f4b41ab8799d9",
+        "name": "Create Stop Timerpayload",
+        "func": "msg.payload = \"STOP\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 2680,
+        "wires": [
+            [
+                "e275a0c38bf4c2f0"
+            ]
+        ]
+    },
+    {
+        "id": "fd3cb73a2c547cd0",
+        "type": "sqlite",
+        "z": "eccf2d53df5f40e0",
+        "g": "d2e0469520506a3d",
+        "mydb": "e2d455fdeb1bf241",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 1000,
+        "y": 2680,
+        "wires": [
+            [
+                "f64b8ee0079109e0"
+            ]
+        ]
+    },
+    {
+        "id": "d1cc5151dcf8c87b",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "g": "d2e0469520506a3d",
+        "name": "Counter und DB Request",
+        "func": "\nlet index = flow.get(\"dbIndex\") || 0;\n\n\nif (msg.payload === \"TIMER_TRIGGERED\") {\n    \n    msg.topic = `SELECT date, time, temp, wind, solar, solarPower, windPower \n                 FROM Realdata \n                 ORDER BY date ASC, time ASC \n                 LIMIT 1 OFFSET ${index};`;\n    \n    flow.set(\"dbIndex\", index + 1);\n    \n    return msg;\n}\n\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 2680,
+        "wires": [
+            [
+                "fd3cb73a2c547cd0"
+            ]
+        ]
+    },
+    {
+        "id": "f64b8ee0079109e0",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "g": "d2e0469520506a3d",
+        "name": "Send-Packet",
+        "func": "\nlet dbData = msg.payload[0]; \nif (!dbData) {\n    return null;\n}\n\nlet tableMap = flow.get(\"tableMap\") || {};\n\n\nlet messages = [];\n\nfor (let key in tableMap) {\n    let device = tableMap[key];\n\n    if (device.module === 1 || device.module === 2) {\n        \n        // Das neue, flache JSON aufbauen\n        let outputMsg = {\n            payload: {\n                mac: device.mac,\n                id: String(device.id),     \n                mestamtip: null,           \n                consumption: null,\n                generation: 0,             \n                storage: null,\n                x: null,\n                y: null,\n                error: null,\n                cmd: \"set_status\",         \n                mode: \"\",                  \n                module: device.module\n            }\n        };\n\n       \n        if (device.module === 1) { \n            outputMsg.payload.generation = dbData.solarPower;\n        } else if (device.module === 2) { \n            outputMsg.payload.generation = dbData.windPower;\n        }\n\n        messages.push(outputMsg);\n    }\n}\n\nif (messages.length > 0) {\n    return [messages]; \n} else {\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1210,
+        "y": 2680,
+        "wires": [
+            [
+                "4ca8556023554825"
+            ]
+        ]
+    },
+    {
+        "id": "4ca8556023554825",
+        "type": "serial out",
+        "z": "eccf2d53df5f40e0",
+        "g": "d2e0469520506a3d",
+        "name": "",
+        "serial": "09b5aa6184335f85",
+        "x": 1210,
+        "y": 2740,
+        "wires": []
+    },
+    {
+        "id": "91beb339ab9fd118",
+        "type": "ui-button",
+        "z": "eccf2d53df5f40e0",
+        "group": "3541b526476c04f2",
+        "name": "Stop Windkraftwerk",
+        "label": "Stop Windkraftwerk",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 150,
+        "y": 2760,
+        "wires": [
+            [
+                "6e960dc94f7a20e1",
+                "3074bcd44c80d0ce"
+            ]
+        ]
+    },
+    {
+        "id": "6e960dc94f7a20e1",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "name": "Stop Windkraftwerk",
+        "func": "let tableMap = flow.get(\"tableMap\") || {};\n\nlet messages = [];\n\nfor (let key in tableMap) {\n    let device = tableMap[key];\n\n    if (device.module === 2) {\n\n        let outputMsg = {\n            payload: {\n                mac: device.mac,\n                id: String(device.id),\n                timestamp: null,\n                consumption: null,\n                generation: 0,\n                storage: null,\n                x: null,\n                y: null,\n                error: null,\n                cmd: \"set_status\",\n                mode: \"\",\n                module: device.module\n            }\n        };\n\n        messages.push(outputMsg);\n    }\n}\n\nif (messages.length > 0) {\n    return [messages];\n} else {\n    // Falls der Button gedrückt wird, aber gar kein Windrad in der Map ist\n    node.warn(\"Kein Windrad (Modul 2) in der tableMap gefunden!\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 2760,
+        "wires": [
+            [
+                "4ca8556023554825"
+            ]
+        ]
+    },
+    {
+        "id": "43ad202f4fc8ec44",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "g": "701f4b41ab8799d9",
+        "name": "Initial Trigger",
+        "func": "msg.payload = \"TIMER_TRIGGERED\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 2600,
+        "wires": [
+            [
+                "d1cc5151dcf8c87b",
+                "56dc86de1207a491"
+            ]
+        ]
+    },
+    {
+        "id": "e2611496d45bc19f",
+        "type": "sqlite",
+        "z": "eccf2d53df5f40e0",
+        "mydb": "e2d455fdeb1bf241",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "name": "",
+        "x": 1080,
+        "y": 2220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f7dd184bcfa1769b",
+        "type": "inject",
+        "z": "eccf2d53df5f40e0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "CREATE TABLE Realdata (     date TEXT,     time TEXT,     temp REAL,     wind REAL,     solar REAL,     solarPower INTEGER,     windPower INTEGER,     totalPower INTEGER,     PRIMARY KEY (date, time) );",
+        "payload": "",
+        "payloadType": "date",
+        "x": 880,
+        "y": 2220,
+        "wires": [
+            [
+                "e2611496d45bc19f"
+            ]
+        ]
+    },
+    {
+        "id": "56dc86de1207a491",
+        "type": "function",
+        "z": "eccf2d53df5f40e0",
+        "g": "fa403590d0b575cc",
+        "name": "DB trigger",
+        "func": "if (msg.payload === \"TIMER_TRIGGERED\") {\n    \n   \n    let currentIndex = flow.get(\"dbIndex\") || 0;\n\n    let offset = Math.max(0, currentIndex - 10);\n\n   \n    let limit = 21; \n\n    msg.topic = `SELECT date, time, temp, wind, solar, solarPower, windPower \n                 FROM Realdata \n                 ORDER BY date ASC, time ASC \n                 LIMIT ${limit} OFFSET ${offset};`;\n\n    return msg;\n}\n\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 2460,
+        "wires": [
+            [
+                "55e7ca0c46ea6df1"
+            ]
+        ]
+    },
+    {
+        "id": "bb3c3d3f30d954da",
+        "type": "ui-group",
+        "name": "Main",
+        "page": "0e13d0ab606329f7",
+        "width": "11",
+        "height": "7",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "09b5aa6184335f85",
+        "type": "serial-port",
+        "name": "GPIO Serial",
+        "serialport": "/dev/ttyS0",
+        "serialbaud": "115200",
+        "databits": 8,
+        "parity": "none",
+        "stopbits": 1,
+        "waitfor": "",
+        "dtr": "none",
+        "rts": "none",
+        "cts": "none",
+        "dsr": "none",
+        "newline": "\\n",
+        "bin": "false",
+        "out": "char",
+        "addchar": "\\n",
+        "responsetimeout": 10000
+    },
+    {
+        "id": "393cd82ac3f9e3f9",
+        "type": "ui-group",
+        "name": "Test",
+        "page": "57f9e13599b106a9",
+        "width": "14",
+        "height": "6",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "1b28ba4362c0e521",
+        "type": "ui-group",
+        "name": "Slider",
+        "page": "2ee7c529c4324fa2",
+        "width": "22",
+        "height": "24",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "f2f24f247aa43f9b",
+        "type": "sqlitedb",
+        "db": "preset",
+        "mode": "RWC"
+    },
+    {
+        "id": "bad1f384ef16bad5",
+        "type": "ui-group",
+        "name": "SQLite DB",
+        "page": "dee7c16d111a8cf2",
+        "width": "9",
+        "height": "6",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "e2d455fdeb1bf241",
+        "type": "sqlitedb",
+        "db": "Realdata",
+        "mode": "RWC"
+    },
+    {
+        "id": "0529dacfd62778eb",
+        "type": "ui-group",
+        "name": "Realdata Visualisation charts",
+        "page": "de417247d86eef5c",
+        "width": "20",
+        "height": "7",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "3541b526476c04f2",
+        "type": "ui-group",
+        "name": "Timer Datacycle",
+        "page": "de417247d86eef5c",
+        "width": "11",
+        "height": "7",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "0e13d0ab606329f7",
+        "type": "ui-page",
+        "name": "Smart Grid Dashboard",
+        "ui": "1213b81d6e844c5f",
+        "path": "/dashboard",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "53d136a24579c6d9",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "57f9e13599b106a9",
+        "type": "ui-page",
+        "name": "Debug",
+        "ui": "1213b81d6e844c5f",
+        "path": "/page4",
+        "icon": "Debug",
+        "layout": "grid",
+        "theme": "53d136a24579c6d9",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 4,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "2ee7c529c4324fa2",
+        "type": "ui-page",
+        "name": "Einstellungen",
+        "ui": "1213b81d6e844c5f",
+        "path": "/page2",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "53d136a24579c6d9",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 2,
+        "className": "",
+        "visible": true,
+        "disabled": "false"
+    },
+    {
+        "id": "dee7c16d111a8cf2",
+        "type": "ui-page",
+        "name": "SQLite",
+        "ui": "1213b81d6e844c5f",
+        "path": "/page3",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "53d136a24579c6d9",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 3,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "de417247d86eef5c",
+        "type": "ui-page",
+        "name": "Readata Visualisation",
+        "ui": "1213b81d6e844c5f",
+        "path": "/page5",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "53d136a24579c6d9",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 5,
+        "className": "",
+        "visible": true,
+        "disabled": false
+    },
+    {
+        "id": "1213b81d6e844c5f",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": true
+    },
+    {
+        "id": "53d136a24579c6d9",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094CE",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    }
+]
